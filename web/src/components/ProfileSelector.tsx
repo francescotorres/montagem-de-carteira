@@ -17,54 +17,61 @@ export const ProfileSelector: React.FC<ProfileSelectorProps> = ({
   const getProfileIcon = (p: InvestorProfile) => {
     switch (p) {
       case 'CONSERVADOR':
-        return <Shield className="w-4 h-4 text-emerald-400" />;
+        return <Shield className="w-4 h-4 text-emerald-600" />;
       case 'MODERADO':
-        return <Scale className="w-4 h-4 text-blue-400" />;
+        return <Scale className="w-4 h-4 text-blue-600" />;
       case 'AGRESSIVO':
-        return <Flame className="w-4 h-4 text-amber-400" />;
+        return <Flame className="w-4 h-4 text-amber-600" />;
     }
   };
 
   const activeRule = PROFILE_RULES[currentProfile];
 
   return (
-    <div className="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5 shadow-lg">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+    <div className="neo-card rounded-2xl p-5 sm:p-6 transition-all">
+      {/* Linha 1: Título e Identificação do Bloco */}
+      <div className="flex items-center justify-between gap-3 mb-4">
         <div>
-          <span className="text-xs uppercase font-semibold tracking-wider text-slate-400">
+          <span className="text-[11px] uppercase font-bold tracking-wider text-blue-600/80 block">
             Estratégia de Investimento
           </span>
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            Perfil do Investidor: <span className="text-blue-400">{activeRule.title}</span>
+          <h3 className="text-base font-bold text-slate-800">
+            Perfil do Investidor: <span className="text-blue-700">{activeRule.title}</span>
           </h3>
         </div>
 
-        {/* Profile pills */}
-        <div className="inline-flex bg-slate-950/80 p-1 rounded-xl border border-slate-800 self-start sm:self-auto">
-          {profiles.map((p) => {
-            const isSelected = currentProfile === p;
-            return (
-              <button
-                key={p}
-                onClick={() => onSelectProfile(p)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
-                  isSelected
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                }`}
-              >
-                {getProfileIcon(p)}
-                <span>{PROFILE_RULES[p].title}</span>
-                {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-blue-200" />}
-              </button>
-            );
-          })}
-        </div>
+        <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+          Ativo
+        </span>
       </div>
 
-      <p className="text-xs sm:text-sm text-slate-300 leading-relaxed bg-slate-950/50 p-3.5 rounded-xl border border-slate-800/60">
+      {/* Linha 2: Os Botões (Conservador, Moderado, Agressivo) na linha abaixo */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-4">
+        {profiles.map((p) => {
+          const isSelected = currentProfile === p;
+          return (
+            <button
+              key={p}
+              type="button"
+              onClick={() => onSelectProfile(p)}
+              className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                isSelected
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25 border border-blue-500 scale-[1.02]'
+                  : 'neo-button text-slate-700 hover:text-blue-600 hover:bg-blue-50/50'
+              }`}
+            >
+              <span className={isSelected ? 'text-white' : ''}>{getProfileIcon(p)}</span>
+              <span>{PROFILE_RULES[p].title}</span>
+              {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-blue-200 ml-auto" />}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Linha 3: Tese Descritiva do Perfil */}
+      <div className="neo-inset p-3.5 rounded-xl text-xs sm:text-sm text-slate-700 leading-relaxed border border-blue-100">
         {activeRule.description}
-      </p>
+      </div>
     </div>
   );
 };

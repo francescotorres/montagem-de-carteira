@@ -49,39 +49,39 @@ export const EditClientConfigModal: React.FC<EditClientConfigModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 relative animate-scaleUp">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-[#f5f8fd] border border-white neo-card rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 relative animate-scaleUp">
         <button
           onClick={onDismiss}
-          className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+          className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1.5 rounded-xl neo-button"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
-        <h2 className="text-xl font-bold text-white mb-4">Editar Parâmetros do Cliente</h2>
+        <h2 className="text-xl font-bold text-slate-850 mb-4">Editar Parâmetros do Cliente</h2>
 
         <form onSubmit={handleSave} className="space-y-4 text-sm">
           {/* Client Name & Date */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">Nome do Cliente</label>
+              <label className="text-xs font-bold text-slate-600 block mb-1">Nome do Cliente</label>
               <input
                 type="text"
                 required
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 neo-inset rounded-xl text-slate-800 font-semibold focus:outline-none focus:border-blue-500"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">Data do Planejamento</label>
+              <label className="text-xs font-bold text-slate-600 block mb-1">Data do Planejamento</label>
               <input
                 type="text"
                 required
                 value={dateStr}
                 onChange={(e) => setDateStr(e.target.value)}
                 placeholder="DD/MM/AAAA"
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 neo-inset rounded-xl text-slate-800 font-semibold focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
@@ -89,13 +89,13 @@ export const EditClientConfigModal: React.FC<EditClientConfigModalProps> = ({
           {/* Employment Type & Profile */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">
+              <label className="text-xs font-bold text-slate-600 block mb-1">
                 Tipo de Ocupação
               </label>
               <select
                 value={employmentType}
                 onChange={(e) => setEmploymentType(e.target.value as EmploymentType)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500 text-xs"
+                className="w-full px-3 py-2 neo-inset rounded-xl text-slate-800 font-semibold focus:outline-none focus:border-blue-500 text-xs"
               >
                 <option value="CLT">CLT (Recomendado 6 meses)</option>
                 <option value="AUTONOMO">Autônomo / PJ (Recomendado 6 meses)</option>
@@ -104,13 +104,13 @@ export const EditClientConfigModal: React.FC<EditClientConfigModalProps> = ({
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">
+              <label className="text-xs font-bold text-slate-600 block mb-1">
                 Perfil de Investidor
               </label>
               <select
                 value={investorProfile}
                 onChange={(e) => setInvestorProfile(e.target.value as InvestorProfile)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500 text-xs"
+                className="w-full px-3 py-2 neo-inset rounded-xl text-slate-800 font-semibold focus:outline-none focus:border-blue-500 text-xs"
               >
                 <option value="CONSERVADOR">Conservador</option>
                 <option value="MODERADO">Moderado</option>
@@ -120,9 +120,9 @@ export const EditClientConfigModal: React.FC<EditClientConfigModalProps> = ({
           </div>
 
           {/* Financial Inputs: Expenses, Total, Reserve */}
-          <div className="space-y-3 pt-2 border-t border-slate-800">
+          <div className="space-y-3 pt-2 border-t border-blue-100">
             <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">
+              <label className="text-xs font-bold text-slate-600 block mb-1">
                 Custo de Vida / Despesas Mensais (R$)
               </label>
               <input
@@ -131,19 +131,19 @@ export const EditClientConfigModal: React.FC<EditClientConfigModalProps> = ({
                 required
                 value={monthlyExpenses}
                 onChange={(e) => setMonthlyExpenses(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 neo-inset rounded-xl text-slate-800 font-bold focus:outline-none focus:border-blue-500"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-semibold text-slate-400">
+                <label className="text-xs font-bold text-slate-600">
                   Fundo de Reserva Atual (R$)
                 </label>
                 <button
                   type="button"
                   onClick={applySuggestedReserve}
-                  className="text-[11px] text-blue-400 hover:underline"
+                  className="text-[11px] text-blue-700 font-bold hover:underline"
                 >
                   Usar meta ideal ({formatCurrency(idealReserveVal)})
                 </button>
@@ -154,15 +154,15 @@ export const EditClientConfigModal: React.FC<EditClientConfigModalProps> = ({
                 required
                 value={reserveFund}
                 onChange={(e) => setReserveFund(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 neo-inset rounded-xl text-slate-800 font-bold focus:outline-none focus:border-blue-500"
               />
-              <span className="text-[11px] text-slate-500 mt-1 block">
+              <span className="text-[11px] text-slate-500 mt-1 block font-medium">
                 Meta ideal para {employmentType}: {idealMonths} meses = {formatCurrency(idealReserveVal)}
               </span>
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">
+              <label className="text-xs font-bold text-slate-600 block mb-1">
                 Patrimônio Total a Alocar (R$)
               </label>
               <input
@@ -171,29 +171,29 @@ export const EditClientConfigModal: React.FC<EditClientConfigModalProps> = ({
                 required
                 value={totalToInvest}
                 onChange={(e) => setTotalToInvest(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 neo-inset rounded-xl text-slate-800 font-bold focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
 
-          {/* Long term preview */}
-          <div className="p-3 rounded-xl bg-blue-950/30 border border-blue-800/40 text-xs">
-            <span className="text-slate-400 block">Montante Efetivo para FIIs e Fiagros:</span>
-            <span className="text-base font-bold text-blue-400">{formatCurrency(longTermVal)}</span>
+          {/* Long term preview in Neo-Inset */}
+          <div className="p-3.5 rounded-xl neo-inset border border-blue-100 text-xs">
+            <span className="text-slate-500 block font-medium">Montante Efetivo para FIIs e Fiagros:</span>
+            <span className="text-base font-extrabold text-blue-700">{formatCurrency(longTermVal)}</span>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-blue-100">
             <button
               type="button"
               onClick={onDismiss}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-medium text-xs transition-colors"
+              className="px-4 py-2 neo-button text-slate-600 rounded-xl font-semibold text-xs"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold text-xs transition-all shadow-md shadow-blue-600/30"
+              className="px-5 py-2 neo-button-primary rounded-xl font-bold text-xs"
             >
               Salvar Parâmetros
             </button>

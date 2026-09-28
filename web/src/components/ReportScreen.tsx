@@ -91,13 +91,13 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({ assets, config, cate
   return (
     <div className="space-y-6">
       {/* Top Action Bar (hidden in print) */}
-      <div className="no-print bg-slate-900/80 border border-slate-800/80 rounded-2xl p-5 shadow-xl flex flex-wrap items-center justify-between gap-4 backdrop-blur-sm">
+      <div className="no-print neo-card rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <FileText className="w-5 h-5 text-blue-400" />
+          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <FileText className="w-5 h-5 text-blue-600" />
             <span>Relatório Executivo da Carteira</span>
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             Gere o documento final completo para apresentação e acompanhamento.
           </p>
         </div>
@@ -105,15 +105,15 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({ assets, config, cate
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             onClick={handleCopy}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium transition-all border border-slate-700 hover:border-slate-600"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl neo-button text-slate-700 hover:text-blue-700 text-xs sm:text-sm font-semibold transition-all"
           >
-            {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-slate-500" />}
             <span>{copied ? 'Copiado!' : 'Copiar Relatório'}</span>
           </button>
 
           <button
             onClick={handleWhatsApp}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold transition-all shadow-md shadow-emerald-600/25"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold transition-all shadow-md shadow-emerald-600/25"
           >
             <Share2 className="w-4 h-4" />
             <span>Enviar no WhatsApp</span>
@@ -121,7 +121,7 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({ assets, config, cate
 
           <button
             onClick={handlePrint}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold transition-all shadow-md shadow-blue-600/25"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl neo-button-primary text-xs sm:text-sm font-bold transition-all"
           >
             <Printer className="w-4 h-4" />
             <span>Imprimir / Salvar PDF</span>
@@ -130,61 +130,61 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({ assets, config, cate
       </div>
 
       {/* Printable Report Document Card */}
-      <div className="print-card bg-slate-900/90 border border-slate-800/90 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-8">
+      <div className="print-card neo-card rounded-2xl p-6 sm:p-8 space-y-8">
         {/* Document Header */}
-        <div className="border-b border-slate-800 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="border-b border-blue-100 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <span className="text-xs uppercase font-bold tracking-widest text-blue-400 block mb-1">
+            <span className="text-xs uppercase font-extrabold tracking-widest text-blue-700 block mb-1">
               Planejamento Patrimonial
             </span>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-850 tracking-tight">
               Relatório de Alocação de Ativos
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
               Fundos Imobiliários, Fiagros e ETFs de Renda Fixa / Ações Globais
             </p>
           </div>
 
-          <div className="bg-slate-950/70 p-4 rounded-xl border border-slate-800 text-xs space-y-1 sm:text-right">
-            <div className="text-slate-400">
-              Cliente: <strong className="text-white">{config.clientName}</strong>
+          <div className="neo-inset p-4 rounded-xl border border-blue-100 text-xs space-y-1 sm:text-right">
+            <div className="text-slate-600 font-medium">
+              Cliente: <strong className="text-slate-800">{config.clientName}</strong>
             </div>
-            <div className="text-slate-400">
-              Data: <strong className="text-white">{config.dateStr}</strong>
+            <div className="text-slate-600 font-medium">
+              Data: <strong className="text-slate-800">{config.dateStr}</strong>
             </div>
-            <div className="text-slate-400">
-              Perfil: <strong className="text-blue-400">{PROFILE_RULES[config.investorProfile].title}</strong>
+            <div className="text-slate-600 font-medium">
+              Perfil: <strong className="text-blue-700">{PROFILE_RULES[config.investorProfile].title}</strong>
             </div>
           </div>
         </div>
 
         {/* Financial Health & Emergency Diagnosis */}
-        <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-5">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+        <div className="neo-inset rounded-xl p-5 border border-blue-100">
+          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
             <span>Diagnóstico do Fundo de Emergência</span>
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
             <div>
-              <span className="text-slate-500 block mb-1">Custo de Vida Mensal</span>
-              <strong className="text-sm text-white">{formatCurrency(config.monthlyExpenses)}</strong>
+              <span className="text-slate-500 block mb-1 font-medium">Custo de Vida Mensal</span>
+              <strong className="text-sm text-slate-800">{formatCurrency(config.monthlyExpenses)}</strong>
             </div>
             <div>
-              <span className="text-slate-500 block mb-1">Reserva Constituída</span>
-              <strong className="text-sm text-slate-200">{formatCurrency(config.reserveFund)}</strong>
+              <span className="text-slate-500 block mb-1 font-medium">Reserva Constituída</span>
+              <strong className="text-sm text-slate-800">{formatCurrency(config.reserveFund)}</strong>
             </div>
             <div>
-              <span className="text-slate-500 block mb-1">Meta Recomendada ({idealMonths} meses)</span>
-              <strong className="text-sm text-blue-400">{formatCurrency(idealReserve)}</strong>
+              <span className="text-slate-500 block mb-1 font-medium">Meta Recomendada ({idealMonths} meses)</span>
+              <strong className="text-sm text-blue-700">{formatCurrency(idealReserve)}</strong>
             </div>
             <div>
-              <span className="text-slate-500 block mb-1">Status da Proteção</span>
+              <span className="text-slate-500 block mb-1 font-medium">Status da Proteção</span>
               <span
-                className={`inline-block px-2 py-0.5 rounded font-semibold text-xs ${
+                className={`inline-block px-2.5 py-0.5 rounded-full font-bold text-xs ${
                   isReserveSufficient
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                    : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                    : 'bg-amber-100 text-amber-800 border border-amber-200'
                 }`}
               >
                 {isReserveSufficient ? 'Reserva Confortável' : 'Abaixo do Recomendado'}
@@ -195,49 +195,49 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({ assets, config, cate
 
         {/* 4 Metric Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4">
-            <span className="text-[11px] text-slate-500 block">Total Investido</span>
-            <div className="text-lg sm:text-xl font-bold text-white mt-1">
+          <div className="neo-inset rounded-xl p-4 border border-blue-100">
+            <span className="text-[11px] text-slate-500 block font-medium">Total Investido</span>
+            <div className="text-lg sm:text-xl font-extrabold text-slate-800 mt-1">
               {formatCurrency(totalInvested)}
             </div>
-            <span className="text-[10px] text-slate-400">{totalShares} cotas totais</span>
+            <span className="text-[10px] text-slate-500 font-medium">{totalShares} cotas totais</span>
           </div>
 
-          <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4">
-            <span className="text-[11px] text-slate-500 block">Renda Mensal Estimada</span>
-            <div className="text-lg sm:text-xl font-bold text-emerald-400 mt-1">
+          <div className="neo-inset rounded-xl p-4 border border-blue-100">
+            <span className="text-[11px] text-slate-500 block font-medium">Renda Mensal Estimada</span>
+            <div className="text-lg sm:text-xl font-extrabold text-emerald-600 mt-1">
               {formatCurrency(totalMonthlyIncome)}
             </div>
-            <span className="text-[10px] text-emerald-500">Proventos isentos de IR</span>
+            <span className="text-[10px] text-emerald-700 font-bold">Proventos isentos de IR</span>
           </div>
 
-          <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4">
-            <span className="text-[11px] text-slate-500 block">Renda Anual Projetada</span>
-            <div className="text-lg sm:text-xl font-bold text-cyan-400 mt-1">
+          <div className="neo-inset rounded-xl p-4 border border-blue-100">
+            <span className="text-[11px] text-slate-500 block font-medium">Renda Anual Projetada</span>
+            <div className="text-lg sm:text-xl font-extrabold text-blue-700 mt-1">
               {formatCurrency(totalAnnualIncome)}
             </div>
-            <span className="text-[10px] text-slate-400">12 meses de proventos</span>
+            <span className="text-[10px] text-slate-500 font-medium">12 meses de proventos</span>
           </div>
 
-          <div className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4">
-            <span className="text-[11px] text-slate-500 block">Dividend Yield Médio</span>
-            <div className="text-lg sm:text-xl font-bold text-indigo-400 mt-1">
+          <div className="neo-inset rounded-xl p-4 border border-blue-100">
+            <span className="text-[11px] text-slate-500 block font-medium">Dividend Yield Médio</span>
+            <div className="text-lg sm:text-xl font-extrabold text-indigo-700 mt-1">
               {formatPercent(avgYield)} a.m.
             </div>
-            <span className="text-[10px] text-slate-400">~{formatPercent(avgYield * 12)} a.a.</span>
+            <span className="text-[10px] text-slate-500 font-medium">~{formatPercent(avgYield * 12)} a.a.</span>
           </div>
         </div>
 
         {/* Detailed Asset Allocation Table */}
         <div className="space-y-3">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-blue-400" />
+          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-blue-600" />
             <span>Composição Detalhada dos Ativos</span>
           </h3>
 
-          <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/60">
+          <div className="overflow-x-auto rounded-xl border border-blue-200/80 bg-white">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider text-[11px] border-b border-slate-800">
+              <thead className="bg-blue-50/70 text-slate-700 uppercase tracking-wider text-[11px] border-b border-blue-200">
                 <tr>
                   <th className="p-3">Ativo</th>
                   <th className="p-3">Categoria</th>
@@ -249,7 +249,7 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({ assets, config, cate
                   <th className="p-3 text-right">DY a.m.</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-blue-50">
                 {activeAssets.map((asset) => {
                   const subtotal = asset.shares * asset.currentPrice;
                   const renda = asset.shares * asset.lastDividend;
@@ -257,34 +257,34 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({ assets, config, cate
                   const badge = getCategoryBadge(asset.category);
 
                   return (
-                    <tr key={asset.ticker} className="hover:bg-slate-900/40">
-                      <td className="p-3 font-bold text-white">{asset.ticker}</td>
+                    <tr key={asset.ticker} className="hover:bg-blue-50/40">
+                      <td className="p-3 font-bold text-slate-800">{asset.ticker}</td>
                       <td className="p-3">
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full border ${badge.bg} ${badge.border}`}>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border ${badge.bg} ${badge.border}`}>
                           {asset.category}
                         </span>
                       </td>
-                      <td className="p-3 text-right font-mono font-medium text-slate-200">{asset.shares}</td>
-                      <td className="p-3 text-right text-slate-300">{formatCurrency(asset.currentPrice)}</td>
-                      <td className="p-3 text-right font-semibold text-white">{formatCurrency(subtotal)}</td>
-                      <td className="p-3 text-right text-emerald-400">{formatCurrency(asset.lastDividend)}</td>
-                      <td className="p-3 text-right font-semibold text-emerald-400">+{formatCurrency(renda)}</td>
-                      <td className="p-3 text-right text-cyan-400">{formatPercent(dy)}</td>
+                      <td className="p-3 text-right font-mono font-bold text-slate-700">{asset.shares}</td>
+                      <td className="p-3 text-right text-slate-700">{formatCurrency(asset.currentPrice)}</td>
+                      <td className="p-3 text-right font-bold text-slate-850">{formatCurrency(subtotal)}</td>
+                      <td className="p-3 text-right text-emerald-600 font-semibold">{formatCurrency(asset.lastDividend)}</td>
+                      <td className="p-3 text-right font-bold text-emerald-600">+{formatCurrency(renda)}</td>
+                      <td className="p-3 text-right font-semibold text-blue-700">{formatPercent(dy)}</td>
                     </tr>
                   );
                 })}
               </tbody>
-              <tfoot className="bg-slate-900/90 font-bold text-white border-t border-slate-800">
+              <tfoot className="bg-blue-50/90 font-bold text-slate-800 border-t border-blue-200">
                 <tr>
                   <td className="p-3" colSpan={2}>
                     Total ({activeAssets.length} ativos)
                   </td>
                   <td className="p-3 text-right font-mono">{totalShares}</td>
                   <td className="p-3 text-right">-</td>
-                  <td className="p-3 text-right text-blue-400">{formatCurrency(totalInvested)}</td>
+                  <td className="p-3 text-right text-blue-700 font-extrabold">{formatCurrency(totalInvested)}</td>
                   <td className="p-3 text-right">-</td>
-                  <td className="p-3 text-right text-emerald-400">+{formatCurrency(totalMonthlyIncome)}</td>
-                  <td className="p-3 text-right text-cyan-400">{formatPercent(avgYield)}</td>
+                  <td className="p-3 text-right text-emerald-600 font-extrabold">+{formatCurrency(totalMonthlyIncome)}</td>
+                  <td className="p-3 text-right text-blue-700 font-extrabold">{formatPercent(avgYield)}</td>
                 </tr>
               </tfoot>
             </table>
@@ -292,9 +292,9 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({ assets, config, cate
         </div>
 
         {/* Educational Terms / Dicionário do Investidor */}
-        <div className="space-y-4 pt-4 border-t border-slate-800">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-blue-400" />
+        <div className="space-y-4 pt-4 border-t border-blue-100">
+          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-blue-600" />
             <span>Guia Educacional: Dicionário do Investidor</span>
           </h3>
 
@@ -302,12 +302,12 @@ export const ReportScreen: React.FC<ReportScreenProps> = ({ assets, config, cate
             {EDUCATIONAL_TERMS.map((item) => (
               <div
                 key={item.term}
-                className="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 text-xs"
+                className="neo-inset rounded-xl p-4 text-xs border border-blue-100"
               >
-                <strong className="text-blue-400 block mb-1 text-sm font-semibold">
+                <strong className="text-blue-700 block mb-1 text-sm font-bold">
                   {item.term}
                 </strong>
-                <p className="text-slate-300 leading-relaxed">{item.definition}</p>
+                <p className="text-slate-700 leading-relaxed font-medium">{item.definition}</p>
               </div>
             ))}
           </div>

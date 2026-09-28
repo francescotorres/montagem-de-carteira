@@ -279,7 +279,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-blue-500 selection:text-white">
+    <div className="min-h-screen bg-gradient-to-b from-[#e8f1fc] via-[#edf4fd] to-[#f4f8fe] text-slate-800 flex flex-col selection:bg-blue-600 selection:text-white">
       {/* Top Navbar */}
       <Navbar
         currentTab={currentTab}
@@ -293,14 +293,14 @@ export const App: React.FC = () => {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl text-xs sm:text-sm animate-slideUp">
-          {toastMessage.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
-          {toastMessage.type === 'warn' && <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />}
-          {toastMessage.type === 'info' && <Info className="w-4 h-4 text-blue-400 shrink-0" />}
-          <span className="text-slate-200">{toastMessage.text}</span>
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl neo-card text-xs sm:text-sm animate-slideUp">
+          {toastMessage.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />}
+          {toastMessage.type === 'warn' && <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />}
+          {toastMessage.type === 'info' && <Info className="w-4 h-4 text-blue-600 shrink-0" />}
+          <span className="text-slate-800 font-semibold">{toastMessage.text}</span>
           <button
             onClick={() => setToastMessage(null)}
-            className="ml-2 text-slate-400 hover:text-white"
+            className="ml-2 text-slate-400 hover:text-slate-700"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -369,7 +369,7 @@ export const App: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="no-print border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
+      <footer className="no-print border-t border-blue-100 bg-[#eaf2fc]/70 py-6 text-center text-xs text-slate-500 font-medium">
         <p>
           Montagem de Carteiras Online &bull; Desenvolvido para Investidores de FIIs, Fiagros e Renda Fixa.
         </p>

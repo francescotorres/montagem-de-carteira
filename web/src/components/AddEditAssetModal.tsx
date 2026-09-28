@@ -89,24 +89,24 @@ export const AddEditAssetModal: React.FC<AddEditAssetModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 relative animate-scaleUp">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-[#f5f8fd] border border-white neo-card rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 relative animate-scaleUp">
         {/* Close Button */}
         <button
           onClick={onDismiss}
-          className="absolute top-5 right-5 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+          className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1.5 rounded-xl neo-button"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
-        <h2 className="text-xl font-bold text-white mb-4">
+        <h2 className="text-xl font-bold text-slate-850 mb-4">
           {initialAsset ? `Editar Ativo: ${initialAsset.ticker}` : 'Adicionar Novo Ativo'}
         </h2>
 
         <form onSubmit={handleSave} className="space-y-4 text-sm">
           {/* Ticker & Online Search */}
           <div>
-            <label className="text-xs font-semibold text-slate-400 block mb-1">
+            <label className="text-xs font-bold text-slate-600 block mb-1">
               Ticker (Código B3)
             </label>
             <div className="flex gap-2">
@@ -116,46 +116,46 @@ export const AddEditAssetModal: React.FC<AddEditAssetModalProps> = ({
                 value={ticker}
                 onChange={(e) => setTicker(e.target.value.toUpperCase())}
                 placeholder="Ex: HGLG11, MXRF11"
-                className="flex-1 px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono uppercase focus:outline-none focus:border-blue-500"
+                className="flex-1 px-3 py-2 neo-inset rounded-xl text-slate-800 font-mono font-bold uppercase focus:outline-none focus:border-blue-500"
               />
               <button
                 type="button"
                 onClick={handleSearchOnline}
                 disabled={isSearching}
-                className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-2 neo-button-primary rounded-xl text-xs font-bold disabled:opacity-50"
               >
                 {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                 <span>Buscar B3</span>
               </button>
             </div>
             {searchFeedback && (
-              <span className="text-[11px] text-blue-400 mt-1 block">{searchFeedback}</span>
+              <span className="text-[11px] text-blue-700 font-semibold mt-1 block">{searchFeedback}</span>
             )}
           </div>
 
           {/* Name */}
           <div>
-            <label className="text-xs font-semibold text-slate-400 block mb-1">Nome do Fundo</label>
+            <label className="text-xs font-bold text-slate-600 block mb-1">Nome do Fundo</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Ex: CSHG Logística FII"
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 neo-inset rounded-xl text-slate-800 font-medium focus:outline-none focus:border-blue-500"
             />
           </div>
 
           {/* Category & Segment */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">Categoria</label>
+              <label className="text-xs font-bold text-slate-600 block mb-1">Categoria</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500 text-xs"
+                className="w-full px-3 py-2 neo-inset rounded-xl text-slate-800 font-medium focus:outline-none focus:border-blue-500 text-xs"
               >
                 {categories.map((c) => (
-                  <option key={c} value={c} className="bg-slate-900">
+                  <option key={c} value={c}>
                     {c}
                   </option>
                 ))}
@@ -163,11 +163,11 @@ export const AddEditAssetModal: React.FC<AddEditAssetModalProps> = ({
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">Segmento</label>
+              <label className="text-xs font-bold text-slate-600 block mb-1">Segmento</label>
               <select
                 value={segmentType}
                 onChange={(e) => setSegmentType(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500 text-xs"
+                className="w-full px-3 py-2 neo-inset rounded-xl text-slate-800 font-medium focus:outline-none focus:border-blue-500 text-xs"
               >
                 <option value="Papel">Papel</option>
                 <option value="Tijolo">Tijolo</option>
@@ -181,75 +181,75 @@ export const AddEditAssetModal: React.FC<AddEditAssetModalProps> = ({
           {/* Price, Dividend, Shares */}
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">Preço (R$)</label>
+              <label className="text-xs font-bold text-slate-600 block mb-1">Preço (R$)</label>
               <input
                 type="number"
                 step="0.01"
                 required
                 value={currentPrice}
                 onChange={(e) => setCurrentPrice(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 neo-inset rounded-xl text-slate-800 font-bold focus:outline-none focus:border-blue-500"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">Últ. Dividendo</label>
+              <label className="text-xs font-bold text-slate-600 block mb-1">Últ. Dividendo</label>
               <input
                 type="number"
                 step="0.01"
                 required
                 value={lastDividend}
                 onChange={(e) => setLastDividend(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 neo-inset rounded-xl text-slate-800 font-bold focus:outline-none focus:border-blue-500"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-400 block mb-1">Qtd Cotas</label>
+              <label className="text-xs font-bold text-slate-600 block mb-1">Qtd Cotas</label>
               <input
                 type="number"
                 required
                 value={shares}
                 onChange={(e) => setShares(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 neo-inset rounded-xl text-slate-800 font-bold focus:outline-none focus:border-blue-500"
               />
             </div>
           </div>
 
           {/* Gestora */}
           <div>
-            <label className="text-xs font-semibold text-slate-400 block mb-1">Gestora</label>
+            <label className="text-xs font-bold text-slate-600 block mb-1">Gestora</label>
             <input
               type="text"
               value={gestora}
               onChange={(e) => setGestora(e.target.value)}
               placeholder="Ex: Credit Suisse Hedging-Griffo"
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 neo-inset rounded-xl text-slate-800 font-medium focus:outline-none focus:border-blue-500"
             />
           </div>
 
           {/* Summary */}
           <div>
-            <label className="text-xs font-semibold text-slate-400 block mb-1">Tese / Resumo</label>
+            <label className="text-xs font-bold text-slate-600 block mb-1">Tese / Resumo</label>
             <textarea
               rows={3}
               value={summaryText}
               onChange={(e) => setSummaryText(e.target.value)}
-              placeholder="Resumo da estratégia e dos diferenciais deste ativo..."
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-blue-500 text-xs"
+              placeholder="Resumo da estratégia e diferenciais do ativo..."
+              className="w-full px-3 py-2 neo-inset rounded-xl text-slate-800 font-medium focus:outline-none focus:border-blue-500 text-xs"
             />
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-blue-100">
             <button
               type="button"
               onClick={onDismiss}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-medium text-xs transition-colors"
+              className="px-4 py-2 neo-button text-slate-600 rounded-xl font-semibold text-xs"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold text-xs transition-all shadow-md shadow-blue-600/30"
+              className="px-5 py-2 neo-button-primary rounded-xl font-bold text-xs"
             >
               Salvar Ativo
             </button>

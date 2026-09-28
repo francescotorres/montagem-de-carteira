@@ -18,53 +18,53 @@ export function formatNumber(value: number): string {
 
 export const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   'CRA / Fiagro': {
-    bg: 'bg-emerald-950/40 text-emerald-300',
-    text: 'text-emerald-400',
-    border: 'border-emerald-700/50',
+    bg: 'bg-emerald-50 text-emerald-800',
+    text: 'text-emerald-700',
+    border: 'border-emerald-200',
   },
   'CRI / Papel': {
-    bg: 'bg-blue-950/40 text-blue-300',
-    text: 'text-blue-400',
-    border: 'border-blue-700/50',
+    bg: 'bg-blue-50 text-blue-800',
+    text: 'text-blue-700',
+    border: 'border-blue-200',
   },
   'Logística / Tijolo': {
-    bg: 'bg-amber-950/40 text-amber-300',
-    text: 'text-amber-400',
-    border: 'border-amber-700/50',
+    bg: 'bg-amber-50 text-amber-800',
+    text: 'text-amber-700',
+    border: 'border-amber-200',
   },
   'Terras / Agrícola': {
-    bg: 'bg-lime-950/40 text-lime-300',
-    text: 'text-lime-400',
-    border: 'border-lime-700/50',
+    bg: 'bg-lime-50 text-lime-800',
+    text: 'text-lime-700',
+    border: 'border-lime-200',
   },
   'Shopping / Tijolo': {
-    bg: 'bg-purple-950/40 text-purple-300',
-    text: 'text-purple-400',
-    border: 'border-purple-700/50',
+    bg: 'bg-purple-50 text-purple-800',
+    text: 'text-purple-700',
+    border: 'border-purple-200',
   },
   'ETF Mundial': {
-    bg: 'bg-cyan-950/40 text-cyan-300',
-    text: 'text-cyan-400',
-    border: 'border-cyan-700/50',
+    bg: 'bg-cyan-50 text-cyan-800',
+    text: 'text-cyan-700',
+    border: 'border-cyan-200',
   },
   'Energia Alternativas': {
-    bg: 'bg-teal-950/40 text-teal-300',
-    text: 'text-teal-400',
-    border: 'border-teal-700/50',
+    bg: 'bg-teal-50 text-teal-800',
+    text: 'text-teal-700',
+    border: 'border-teal-200',
   },
   'ETF Renda Fixa': {
-    bg: 'bg-indigo-950/40 text-indigo-300',
-    text: 'text-indigo-400',
-    border: 'border-indigo-700/50',
+    bg: 'bg-indigo-50 text-indigo-800',
+    text: 'text-indigo-700',
+    border: 'border-indigo-200',
   },
 };
 
 export function getCategoryBadge(category: string) {
   return (
     CATEGORY_COLORS[category] || {
-      bg: 'bg-slate-800 text-slate-300',
-      text: 'text-slate-400',
-      border: 'border-slate-700',
+      bg: 'bg-slate-100 text-slate-800',
+      text: 'text-slate-700',
+      border: 'border-slate-200',
     }
   );
 }

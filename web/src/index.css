@@ -2,27 +2,78 @@
 
 @layer base {
   body {
-    background-color: #0b0f19;
-    color: #e2e8f0;
+    background-color: #eef4fc;
+    color: #0f172a;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 }
 
-/* Custom scrollbar */
+/* Neomorphic Utility Classes */
+.neo-card {
+  background: #ffffff;
+  box-shadow: 6px 6px 18px rgba(180, 198, 222, 0.4), -6px -6px 18px rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(226, 237, 250, 0.8);
+}
+
+.neo-card-subtle {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  box-shadow: 4px 4px 14px rgba(180, 198, 222, 0.35), -4px -4px 14px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+}
+
+.neo-inset {
+  background: #e9f1fb;
+  box-shadow: inset 3px 3px 6px rgba(180, 198, 222, 0.4), inset -3px -3px 6px rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(214, 228, 246, 0.6);
+}
+
+.neo-button {
+  background: #ffffff;
+  box-shadow: 3px 3px 8px rgba(180, 198, 222, 0.45), -3px -3px 8px rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(226, 237, 250, 0.9);
+  transition: all 0.2s ease;
+}
+
+.neo-button:hover {
+  box-shadow: 4px 4px 12px rgba(180, 198, 222, 0.55), -4px -4px 12px rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+}
+
+.neo-button:active, .neo-button-active {
+  background: #e9f1fb;
+  box-shadow: inset 2px 2px 5px rgba(180, 198, 222, 0.45), inset -2px -2px 5px rgba(255, 255, 255, 0.95);
+  transform: translateY(0);
+}
+
+.neo-button-primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  box-shadow: 4px 4px 12px rgba(37, 99, 235, 0.35), -2px -2px 8px rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(147, 197, 253, 0.5);
+  transition: all 0.2s ease;
+}
+
+.neo-button-primary:hover {
+  box-shadow: 5px 5px 16px rgba(37, 99, 235, 0.45), -2px -2px 10px rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+}
+
+/* Custom scrollbar in pastel blue */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+  background: #e4eef9;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(59, 130, 246, 0.3);
+  background: #93c5fd;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.6);
+  background: #60a5fa;
 }
 
 /* Print styling */

@@ -46,14 +46,14 @@ export const CategoryBalanceScreen: React.FC<CategoryBalanceScreenProps> = ({
   return (
     <div className="space-y-6">
       {/* Top Banner: Status of Target Total */}
-      <div className="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-5 shadow-xl backdrop-blur-sm">
+      <div className="neo-card rounded-2xl p-5 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Sliders className="w-5 h-5 text-blue-400" />
+            <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <Sliders className="w-5 h-5 text-blue-600" />
               <span>Balanceamento por Categoria</span>
             </h2>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Ajuste as metas percentuais de cada classe de ativo para manter o risco sob controle.
             </p>
           </div>
@@ -61,16 +61,16 @@ export const CategoryBalanceScreen: React.FC<CategoryBalanceScreenProps> = ({
           <div className="flex items-center gap-3">
             <button
               onClick={applyProfileDefaultTargets}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors border border-slate-700"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl neo-button text-slate-700 hover:text-blue-700 text-xs font-semibold"
             >
-              <RotateCcw className="w-3.5 h-3.5 text-blue-400" />
-              <span>Restaurar Metas do Perfil ({config.investorProfile})</span>
+              <RotateCcw className="w-3.5 h-3.5 text-blue-600" />
+              <span>Restaurar Metas ({config.investorProfile})</span>
             </button>
 
             <button
               onClick={onRebalance}
               disabled={!isTargetValid}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-semibold transition-all shadow-lg shadow-blue-600/25 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl neo-button-primary text-xs sm:text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span>Rebalancear Carteira</span>
               <ArrowRight className="w-4 h-4" />
@@ -78,26 +78,26 @@ export const CategoryBalanceScreen: React.FC<CategoryBalanceScreenProps> = ({
           </div>
         </div>
 
-        {/* Validation Bar */}
-        <div className="mt-4 pt-4 border-t border-slate-800/80 flex items-center justify-between">
+        {/* Validation Bar in Neo-Inset */}
+        <div className="mt-4 pt-4 border-t border-blue-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
             {isTargetValid ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             ) : (
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
+              <AlertTriangle className="w-4 h-4 text-amber-600" />
             )}
-            <span className={`text-xs font-semibold ${isTargetValid ? 'text-emerald-400' : 'text-amber-400'}`}>
+            <span className={`text-xs font-bold ${isTargetValid ? 'text-emerald-700' : 'text-amber-700'}`}>
               Soma das Metas: {formatPercent(totalTargetPercent, 1)}
             </span>
             {!isTargetValid && (
-              <span className="text-[11px] text-amber-300/80 hidden sm:inline">
+              <span className="text-[11px] text-amber-600 font-medium hidden sm:inline">
                 (A soma de todas as categorias deve atingir 100%)
               </span>
             )}
           </div>
 
-          <div className="text-xs text-slate-400">
-            Total Disponível: <strong className="text-white">{formatCurrency(longTermCapital)}</strong>
+          <div className="text-xs text-slate-500 font-medium">
+            Total Disponível: <strong className="text-slate-800">{formatCurrency(longTermCapital)}</strong>
           </div>
         </div>
       </div>
@@ -115,25 +115,25 @@ export const CategoryBalanceScreen: React.FC<CategoryBalanceScreenProps> = ({
           return (
             <div
               key={target.categoryName}
-              className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-5 shadow-md backdrop-blur-sm"
+              className="neo-card rounded-2xl p-5 transition-all"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                 <div className="flex items-center gap-3">
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-semibold border ${badge.bg} ${badge.border}`}>
+                  <span className={`text-xs px-3 py-1 rounded-full font-bold border ${badge.bg} ${badge.border}`}>
                     {target.categoryName}
                   </span>
-                  <span className="text-xs text-slate-400">
-                    {catAssets.length} ativo(s) ativo(s)
+                  <span className="text-xs text-slate-500 font-medium">
+                    {catAssets.length} ativo(s) selecionado(s)
                   </span>
                 </div>
 
                 {/* Percentage stepper & direct control */}
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400">Meta:</span>
-                  <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg p-0.5">
+                  <span className="text-xs text-slate-600 font-semibold">Meta:</span>
+                  <div className="flex items-center neo-inset rounded-lg p-0.5 border border-blue-200">
                     <button
                       onClick={() => handlePercentChange(target.categoryName, target.targetPercentage - 1)}
-                      className="px-2 py-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded text-xs font-semibold"
+                      className="px-2 py-1 text-slate-600 hover:text-blue-700 hover:bg-white rounded text-xs font-bold"
                     >
                       -1%
                     </button>
@@ -146,11 +146,11 @@ export const CategoryBalanceScreen: React.FC<CategoryBalanceScreenProps> = ({
                       onChange={(e) =>
                         handlePercentChange(target.categoryName, parseFloat(e.target.value) || 0)
                       }
-                      className="w-16 text-center bg-transparent text-sm font-bold text-blue-400 focus:outline-none"
+                      className="w-16 text-center bg-transparent text-sm font-extrabold text-blue-700 focus:outline-none"
                     />
                     <button
                       onClick={() => handlePercentChange(target.categoryName, target.targetPercentage + 1)}
-                      className="px-2 py-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded text-xs font-semibold"
+                      className="px-2 py-1 text-slate-600 hover:text-blue-700 hover:bg-white rounded text-xs font-bold"
                     >
                       +1%
                     </button>
@@ -167,40 +167,40 @@ export const CategoryBalanceScreen: React.FC<CategoryBalanceScreenProps> = ({
                   step="0.5"
                   value={target.targetPercentage}
                   onChange={(e) => handlePercentChange(target.categoryName, parseFloat(e.target.value))}
-                  className="w-full accent-blue-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg appearance-none"
+                  className="w-full accent-blue-600 cursor-pointer h-2 bg-blue-100 rounded-lg appearance-none"
                 />
               </div>
 
               {/* Visual Progress Bar (Current vs Target) */}
               <div className="space-y-1.5 mt-2">
-                <div className="flex justify-between text-xs text-slate-400">
+                <div className="flex justify-between text-xs text-slate-600 font-medium">
                   <span>
-                    Alocado: <strong className="text-white">{formatCurrency(currentCatValue)}</strong> ({formatPercent(currentCatPercent, 1)})
+                    Alocado: <strong className="text-slate-800">{formatCurrency(currentCatValue)}</strong> ({formatPercent(currentCatPercent, 1)})
                   </span>
                   <span>
-                    Meta: <strong className="text-blue-400">{formatCurrency(targetValue)}</strong> ({formatPercent(target.targetPercentage, 1)})
+                    Meta: <strong className="text-blue-700">{formatCurrency(targetValue)}</strong> ({formatPercent(target.targetPercentage, 1)})
                   </span>
                 </div>
 
-                <div className="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden flex border border-slate-800">
+                <div className="w-full bg-blue-100/80 h-3 rounded-full overflow-hidden flex border border-blue-200 neo-inset">
                   <div
-                    className="bg-gradient-to-r from-blue-600 to-cyan-500 h-full rounded-full transition-all duration-300"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 h-full rounded-full transition-all duration-300 shadow-sm"
                     style={{ width: `${Math.min(100, currentCatPercent)}%` }}
                   />
                 </div>
 
                 <div className="flex justify-between items-center text-[11px] pt-1">
-                  <span className="text-slate-500">
+                  <span className="text-slate-500 font-medium">
                     Ativos:{' '}
-                    {catAssets.map((a) => a.ticker).join(', ') || 'Nenhum ativo selecionado'}
+                    {catAssets.map((a) => a.ticker).join(', ') || 'Nenhum ativo'}
                   </span>
                   <span
-                    className={`font-medium ${
+                    className={`font-bold ${
                       Math.abs(diffValue) < 100
-                        ? 'text-emerald-400'
+                        ? 'text-emerald-600'
                         : diffValue > 0
-                        ? 'text-blue-400'
-                        : 'text-amber-400'
+                        ? 'text-blue-700'
+                        : 'text-amber-600'
                     }`}
                   >
                     {Math.abs(diffValue) < 100

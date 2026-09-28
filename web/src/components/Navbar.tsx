@@ -21,35 +21,35 @@ export const Navbar: React.FC<NavbarProps> = ({
   onResetDefaults,
 }) => {
   return (
-    <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 shadow-xl">
+    <header className="sticky top-0 z-40 bg-[#f0f5fc]/90 backdrop-blur-md border-b border-blue-100 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo / Brand */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/25">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-500 flex items-center justify-center shadow-md shadow-blue-500/25">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
-              <span className="text-lg font-bold tracking-tight text-white flex items-center gap-1.5">
+              <span className="text-base sm:text-lg font-bold tracking-tight text-slate-800 flex items-center gap-1.5">
                 Montagem de Carteiras
-                <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-blue-100 text-blue-700 border border-blue-200">
                   Online
                 </span>
               </span>
-              <p className="text-xs text-slate-400 hidden sm:block">
+              <p className="text-[11px] text-slate-500 hidden sm:block">
                 Planejador inteligente de FIIs, Fiagros e ETFs
               </p>
             </div>
           </div>
 
-          {/* Navigation Tabs */}
-          <nav className="flex items-center gap-1 sm:gap-2 bg-slate-950/60 p-1 rounded-xl border border-slate-800">
+          {/* Navigation Tabs - Neomorphic Pill */}
+          <nav className="flex items-center gap-1 sm:gap-2 neo-inset p-1 rounded-xl">
             <button
               onClick={() => onSelectTab(0)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
                 currentTab === 0
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
               <TrendingUp className="w-4 h-4" />
@@ -57,10 +57,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
             <button
               onClick={() => onSelectTab(1)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
                 currentTab === 1
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
               <PieChart className="w-4 h-4" />
@@ -68,10 +68,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
             <button
               onClick={() => onSelectTab(2)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
                 currentTab === 2
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
               <FileText className="w-4 h-4" />
@@ -81,20 +81,20 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Quick Metrics & Reset */}
           <div className="flex items-center gap-3">
-            <div className="hidden lg:flex items-center gap-4 text-xs bg-slate-950/50 px-3 py-1.5 rounded-xl border border-slate-800">
+            <div className="hidden lg:flex items-center gap-4 text-xs neo-card px-3.5 py-1.5 rounded-xl">
               <div>
-                <span className="text-slate-500 block">Investido</span>
-                <span className="font-semibold text-slate-200">{formatCurrency(totalInvested)}</span>
+                <span className="text-slate-500 block text-[10px]">Investido</span>
+                <span className="font-bold text-slate-800">{formatCurrency(totalInvested)}</span>
               </div>
-              <div className="w-px h-6 bg-slate-800" />
+              <div className="w-px h-6 bg-slate-200" />
               <div>
-                <span className="text-slate-500 block">Renda/Mês</span>
-                <span className="font-semibold text-emerald-400">{formatCurrency(monthlyIncome)}</span>
+                <span className="text-slate-500 block text-[10px]">Renda/Mês</span>
+                <span className="font-bold text-emerald-600">{formatCurrency(monthlyIncome)}</span>
               </div>
-              <div className="w-px h-6 bg-slate-800" />
+              <div className="w-px h-6 bg-slate-200" />
               <div>
-                <span className="text-slate-500 block">DY Médio</span>
-                <span className="font-semibold text-cyan-400">{formatPercent(avgYield)} a.m.</span>
+                <span className="text-slate-500 block text-[10px]">DY Médio</span>
+                <span className="font-bold text-blue-600">{formatPercent(avgYield)} a.m.</span>
               </div>
             </div>
 
@@ -105,7 +105,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }
               }}
               title="Restaurar valores padrão"
-              className="p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-colors border border-slate-800/80"
+              className="p-2 neo-button text-slate-500 hover:text-slate-800 rounded-xl"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
