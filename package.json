@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "description": "Planejador e gerador de relatórios de carteiras de Fundos Imobiliários e Fiagros (App Android + App Web Online)",
+  "workspaces": [
+    "web"
+  ],
   "scripts": {
+    "build": "npm --prefix web install && npm --prefix web run build",
+    "web:build": "npm --prefix web install && npm --prefix web run build",
     "web:dev": "npm --prefix web run dev",
-    "web:build": "npm --prefix web run build",
     "web:preview": "npm --prefix web run preview"
   }
 }
