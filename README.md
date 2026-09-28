@@ -6,7 +6,28 @@ Disponível tanto como **aplicativo web online** (executável em qualquer navega
 
 ---
 
-## 🚀 Funcionalidades Principais
+## 🚀 Publicar na Vercel (1-Clique)
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/francescotorres/montagem-de-carteira)
+
+### Configurações na Vercel:
+* **Framework Preset:** `Vite`
+* **Root Directory:** `./` (gerenciado automaticamente pelo [`vercel.json`](./vercel.json)) ou `web`
+* **Build Command:** `npm run web:build` (ou `npm run build` dentro de `web`)
+* **Output Directory:** `web/dist` (ou `dist`)
+
+### Variáveis de Ambiente na Vercel (Environment Variables):
+
+O aplicativo funciona **sem exigir nenhuma variável obrigatória** (zero config). Caso queira recursos opcionais:
+
+| Variável | Obrigatória? | Descrição | Onde Obter |
+| :--- | :---: | :--- | :--- |
+| `VITE_BRAPI_TOKEN` | **Opcional** | Token gratuito para cotações em tempo real da B3 com limite estendido. *(Sem token, o app utiliza automaticamente fallback público e Yahoo Finance).* | [brapi.dev](https://brapi.dev) |
+| `VITE_GEMINI_API_KEY` | **Opcional** | Chave da API Gemini do Google caso deseje integrar recursos generativos. | [aistudio.google.com](https://aistudio.google.com/) |
+
+---
+
+## ✨ Funcionalidades Principais
 
 1. **Gestão Dinâmica de Ativos:**
    - Suporte a Fundos Imobiliários (CRI/Papel, Tijolo/Logística, Shopping), Fiagros (CRA), Terras Agrícolas, Energia Limpa/Alternativas e ETFs (Mundial e Renda Fixa Selic).
@@ -42,7 +63,7 @@ O aplicativo web foi desenvolvido com **React 19**, **TypeScript**, **Vite** e *
 ### Como Rodar o Web App Localmente:
 
 ```bash
-# 1. Instalar dependências (na raiz ou na pasta web/)
+# 1. Instalar dependências
 npm --prefix web install
 
 # 2. Iniciar servidor de desenvolvimento local
@@ -56,10 +77,6 @@ Abra o navegador no endereço indicado (por padrão `http://localhost:5173`).
 npm run web:build
 ```
 Os arquivos otimizados prontos para publicação estarão na pasta `web/dist/`.
-
-### Como Publicar Online (Deploy Rápido):
-- **Vercel / Netlify:** Conecte o repositório do GitHub e defina a pasta raiz como `web/` com build command `npm run build` e output directory `dist`.
-- **GitHub Pages:** Pode ser implantado automaticamente via GitHub Actions com workflow para Vite.
 
 ---
 
@@ -93,8 +110,10 @@ Montagem de Carteira/
 │   │   ├── utils/        # Formatadores monetários brasileiros e badges
 │   │   └── App.tsx       # Estado global, persistência e orquestração
 │   ├── package.json
-│   └── vite.config.ts
+│   ├── vite.config.ts
+│   └── .env.example      # Variáveis de ambiente web opcionais
 ├── package.json          # Scripts utilitários de conveniência
+├── vercel.json           # Configuração de build automático na Vercel
 └── README.md
 ```
 
