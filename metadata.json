@@ -1,0 +1,6 @@
+{
+  "name": "Montagem de Carteiras",
+  "description": "Planejador e gerador de relatórios de carteiras de Fundos Imobiliários e Fiagros com cotações atuais e balanceamento por perfil.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

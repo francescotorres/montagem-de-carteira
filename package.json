@@ -1,0 +1,11 @@
+{
+  "name": "montagem-de-carteira",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Planejador e gerador de relatórios de carteiras de Fundos Imobiliários e Fiagros (App Android + App Web Online)",
+  "scripts": {
+    "web:dev": "npm --prefix web run dev",
+    "web:build": "npm --prefix web run build",
+    "web:preview": "npm --prefix web run preview"
+  }
+}
