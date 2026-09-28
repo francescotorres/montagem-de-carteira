@@ -73,7 +73,7 @@ export const ClientConfigCard: React.FC<ClientConfigCardProps> = ({ config, onEd
           </div>
           <div className="flex items-center gap-1.5 mt-1">
             <span
-              className={`text-[11px] px-1.5 py-0.5 rounded font-semibold ${
+              className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${
                 isReserveSufficient
                   ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                   : 'bg-amber-100 text-amber-800 border border-amber-200'
@@ -81,7 +81,7 @@ export const ClientConfigCard: React.FC<ClientConfigCardProps> = ({ config, onEd
             >
               {isReserveSufficient ? 'Adequada' : 'Abaixo do Ideal'}
             </span>
-            <span className="text-[11px] text-slate-500">
+            <span className="text-[10px] text-slate-500">
               (Meta: {idealMonths}m = {formatCurrency(idealReserve)})
             </span>
           </div>
@@ -91,9 +91,6 @@ export const ClientConfigCard: React.FC<ClientConfigCardProps> = ({ config, onEd
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50/60 rounded-xl p-4 border border-blue-200/80 shadow-sm">
           <div className="flex items-center justify-between text-blue-800 text-xs mb-1">
             <span className="font-bold">Alocação de Longo Prazo</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-600 text-white font-semibold">
-              FIIs & Fiagros
-            </span>
           </div>
           <div className="text-xl font-extrabold text-blue-700 tracking-tight">
             {formatCurrency(longTermValue)}
