@@ -2,16 +2,21 @@ import type { ScrapedMarketData } from '../types';
 
 /**
  * Consulta cotação atualizada na B3 com múltiplos fallbacks:
- * 1. Brapi API (API aberta para B3 / FIIs)
+ * 1. Brapi API (API aberta para B3 / FIIs com suporte a token opcional VITE_BRAPI_TOKEN)
  * 2. Yahoo Finance via AllOrigins proxy
  * 3. Fallback inteligente caso haja bloqueio de rede/CORS
  */
 export async function fetchMarketQuote(tickerInput: string): Promise<ScrapedMarketData> {
   const ticker = tickerInput.trim().toUpperCase();
 
-  // Tentativa 1: Brapi
+  // Tentativa 1: Brapi (usa token se configurado no ambiente Vercel)
   try {
-    const res = await fetch(`https://brapi.dev/api/quote/${ticker}?range=1d&interval=1d`, {
+    const brapiToken = import.meta.env.VITE_BRAPI_TOKEN;
+    const brapiUrl = brapiToken
+      ? `https://brapi.dev/api/quote/${ticker}?token=${brapiToken}&range=1d&interval=1d`
+      : `https://brapi.dev/api/quote/${ticker}?range=1d&interval=1d`;
+
+    const res = await fetch(brapiUrl, {
       signal: AbortSignal.timeout(5000),
     });
     if (res.ok) {
