@@ -4,7 +4,7 @@ import { useAuth } from './AuthContext';
 interface UserItem { id: number; nome: string; }
 
 export const UsersPanel: React.FC = () => {
-  const { token, user: currentUser, logout, apiBase } = useAuth();
+  const { user: currentUser, listUsers, createUser, deleteUser, isStandaloneMode } = useAuth();
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -15,11 +15,6 @@ export const UsersPanel: React.FC = () => {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [toast, setToast] = useState('');
 
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  };
-
   const showToastMsg = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(''), 3500);
@@ -28,16 +23,14 @@ export const UsersPanel: React.FC = () => {
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${apiBase}/api/users`, { headers });
-      if (res.status === 401) { logout(); return; }
-      const data = await res.json();
+      const data = await listUsers();
       setUsers(data);
-    } catch {
-      showToastMsg('Erro ao carregar usuários');
+    } catch (err: unknown) {
+      showToastMsg(err instanceof Error ? err.message : 'Erro ao carregar usuários');
     } finally {
       setLoading(false);
     }
-  }, [token, apiBase]);
+  }, [listUsers]);
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
@@ -47,21 +40,13 @@ export const UsersPanel: React.FC = () => {
     if (newSenha !== confirmSenha) { setModalError('As senhas não coincidem'); return; }
     if (newSenha.length < 6) { setModalError('Senha deve ter ao menos 6 caracteres'); return; }
     try {
-      const res = await fetch(`${apiBase}/api/users`, {
-        method: 'POST', headers,
-        body: JSON.stringify({ nome: newNome.trim(), senha: newSenha })
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        setModalError((err as any).message || 'Erro ao criar usuário');
-        return;
-      }
+      await createUser(newNome, newSenha);
       setShowModal(false);
       setNewNome(''); setNewSenha(''); setConfirmSenha('');
       showToastMsg('✅ Usuário criado com sucesso!');
       fetchUsers();
-    } catch {
-      setModalError('Erro ao criar usuário');
+    } catch (err: unknown) {
+      setModalError(err instanceof Error ? err.message : 'Erro ao criar usuário');
     }
   };
 
@@ -69,13 +54,11 @@ export const UsersPanel: React.FC = () => {
     if (!window.confirm(`Tem certeza que deseja excluir o usuário "${nome}"?`)) return;
     setDeletingId(id);
     try {
-      const res = await fetch(`${apiBase}/api/users/${id}`, { method: 'DELETE', headers });
-      if (res.status === 403) { showToastMsg('⚠️ Você não pode excluir a si mesmo'); return; }
-      if (!res.ok) { showToastMsg('Erro ao excluir usuário'); return; }
+      await deleteUser(id);
       showToastMsg('🗑️ Usuário excluído com sucesso!');
       fetchUsers();
-    } catch {
-      showToastMsg('Erro ao excluir usuário');
+    } catch (err: unknown) {
+      showToastMsg(err instanceof Error ? err.message : 'Erro ao excluir usuário');
     } finally {
       setDeletingId(null);
     }
