@@ -1,0 +1,20 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:sqlite:./montagem.db
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  security:
+    user:
+      name: ignored
+
+app:
+  jwt:
+    secret: "MontagemCarteiraSecretKey2024SuperSeguraBase64Encoded=="
+    expiration-ms: 7200000
