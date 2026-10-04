@@ -30,7 +30,7 @@ export const LoginPage: React.FC = () => {
     setError('');
     setLoading(true);
     try {
-      await login(nome.trim(), senha);
+      await login(nome.trim(), senha.trim());
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erro ao fazer login');
     } finally {
@@ -46,6 +46,8 @@ export const LoginPage: React.FC = () => {
       justifyContent: 'center',
       position: 'relative',
       overflow: 'hidden',
+      padding: '1rem',
+      boxSizing: 'border-box',
       background: 'linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 35%, #7DD3FC 65%, #38BDF8 100%)'
     }}>
       {/* Animated Blobs */}
@@ -65,14 +67,14 @@ export const LoginPage: React.FC = () => {
       <div style={{
         position: 'relative', zIndex: 10,
         width: '100%', maxWidth: '420px',
-        margin: '1rem',
-        background: 'rgba(255,255,255,0.35)',
+        background: 'rgba(255,255,255,0.4)',
         backdropFilter: 'blur(16px) saturate(180%)',
         WebkitBackdropFilter: 'blur(16px) saturate(180%)',
         borderRadius: '24px',
         border: '1px solid rgba(255,255,255,0.6)',
         boxShadow: '0 8px 32px 0 rgba(31,147,255,0.15), inset 0 1px 0 rgba(255,255,255,0.7)',
-        padding: '2.5rem 2rem'
+        padding: '2rem 1.5rem',
+        boxSizing: 'border-box'
       }}>
         {/* Logo / Title */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -93,6 +95,51 @@ export const LoginPage: React.FC = () => {
           <p style={{ color: '#0369A1', fontSize: '0.875rem', marginTop: '0.25rem', fontWeight: 500 }}>
             Acesse sua conta para continuar
           </p>
+          {/* Quick Credential Helpers */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '8px',
+            marginTop: '0.85rem',
+            flexWrap: 'wrap'
+          }}>
+            <button
+              type="button"
+              onClick={() => { setNome('Francesco'); setSenha('240322'); setError(''); }}
+              style={{
+                background: 'rgba(255,255,255,0.7)',
+                border: '1px solid rgba(56,189,248,0.5)',
+                borderRadius: '8px',
+                padding: '4px 10px',
+                fontSize: '0.72rem',
+                color: '#0369A1',
+                cursor: 'pointer',
+                fontWeight: 600,
+                transition: 'all 0.15s ease'
+              }}
+              title="Preencher credenciais de Francesco"
+            >
+              👤 Francesco
+            </button>
+            <button
+              type="button"
+              onClick={() => { setNome('admin'); setSenha('admin123'); setError(''); }}
+              style={{
+                background: 'rgba(255,255,255,0.7)',
+                border: '1px solid rgba(56,189,248,0.5)',
+                borderRadius: '8px',
+                padding: '4px 10px',
+                fontSize: '0.72rem',
+                color: '#0369A1',
+                cursor: 'pointer',
+                fontWeight: 600,
+                transition: 'all 0.15s ease'
+              }}
+              title="Preencher credenciais de admin"
+            >
+              🔑 admin
+            </button>
+          </div>
         </div>
 
         {/* Inactivity Alert */}
@@ -134,6 +181,11 @@ export const LoginPage: React.FC = () => {
               <input
                 type="text" value={nome} onChange={e => setNome(e.target.value)}
                 placeholder="Seu nome de usuário" required autoFocus
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                autoComplete="username"
+                inputMode="text"
                 style={{
                   width: '100%', paddingLeft: '44px', paddingRight: '14px',
                   paddingTop: '12px', paddingBottom: '12px',
@@ -166,6 +218,10 @@ export const LoginPage: React.FC = () => {
               <input
                 type={showPass ? 'text' : 'password'} value={senha} onChange={e => setSenha(e.target.value)}
                 placeholder="Sua senha" required
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                autoComplete="current-password"
                 style={{
                   width: '100%', paddingLeft: '44px', paddingRight: '48px',
                   paddingTop: '12px', paddingBottom: '12px',

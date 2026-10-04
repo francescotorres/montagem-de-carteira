@@ -13,8 +13,21 @@ class DataInitializer(
 ) {
     @Bean
     fun initDatabase(): CommandLineRunner = CommandLineRunner {
-        if (userRepository.count() == 0L) {
-            val encoder = BCryptPasswordEncoder(12)
+        val encoder = BCryptPasswordEncoder(12)
+        if (!userRepository.existsByNome("Francesco")) {
+            userRepository.save(
+                User(
+                    nome = "Francesco",
+                    passwordHash = encoder.encode("240322")
+                )
+            )
+            println("==================================================")
+            println("  Usuário Francesco inicializado:")
+            println("  Usuário: Francesco")
+            println("  Senha:   240322")
+            println("==================================================")
+        }
+        if (!userRepository.existsByNome("admin")) {
             userRepository.save(
                 User(
                     nome = "admin",
@@ -22,8 +35,7 @@ class DataInitializer(
                 )
             )
             println("==================================================")
-            println("  [INICIALIZAÇÃO] Nenhum usuário encontrado.")
-            println("  Usuário inicial criado automaticamente:")
+            println("  Usuário admin inicializado:")
             println("  Usuário: admin")
             println("  Senha:   admin123")
             println("==================================================")

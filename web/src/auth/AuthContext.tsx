@@ -10,8 +10,15 @@ const getApiBase = () => {
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL.replace(/\/$/, '');
   }
-  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-    return 'http://localhost:8080';
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://localhost:8080';
+    }
+    // Suporte para rede local (acesso mobile na mesma Wi-Fi do computador de desenvolvimento)
+    if (/^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(host)) {
+      return `http://${host}:8080`;
+    }
   }
   return '';
 };
@@ -30,17 +37,44 @@ interface LocalStoredUser {
 }
 
 const DEFAULT_USERS: LocalStoredUser[] = [
-  { id: 1, nome: 'admin', passwordHash: 'admin123' }
+  { id: 1, nome: 'Francesco', passwordHash: '240322' },
+  { id: 2, nome: 'admin', passwordHash: 'admin123' }
 ];
 
 const getLocalUsers = (): LocalStoredUser[] => {
   try {
     const raw = localStorage.getItem(USERS_DB_KEY);
-    if (!raw) {
-      localStorage.setItem(USERS_DB_KEY, JSON.stringify(DEFAULT_USERS));
-      return DEFAULT_USERS;
+    let users: LocalStoredUser[] = [];
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          users = parsed;
+        }
+      } catch {
+        users = [];
+      }
     }
-    return JSON.parse(raw);
+
+    let modified = false;
+
+    // Garante que os usuários padrão existam e tenham as credenciais atualizadas
+    for (const def of DEFAULT_USERS) {
+      const idx = users.findIndex(u => u.nome.trim().toLowerCase() === def.nome.trim().toLowerCase());
+      if (idx === -1) {
+        users.push({ ...def });
+        modified = true;
+      } else if (def.nome.toLowerCase() === 'francesco' && users[idx].passwordHash !== def.passwordHash) {
+        // Garante sincronia da senha caso o storage local anterior esteja desatualizado
+        users[idx].passwordHash = def.passwordHash;
+        modified = true;
+      }
+    }
+
+    if (modified || !raw) {
+      localStorage.setItem(USERS_DB_KEY, JSON.stringify(users));
+    }
+    return users;
   } catch {
     return DEFAULT_USERS;
   }
@@ -110,6 +144,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (nome: string, senha: string) => {
     const trimmedNome = nome.trim();
+    const trimmedSenha = senha.trim();
 
     // Se temos uma API configurada, tentamos a conexão com o backend Kotlin/Spring Boot
     if (API_BASE && !isStandalone) {
@@ -117,7 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const res = await fetch(`${API_BASE}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nome: trimmedNome, senha })
+          body: JSON.stringify({ nome: trimmedNome, senha: trimmedSenha })
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
@@ -143,8 +178,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Modo Standalone (para Vercel ou quando o backend não está ativo)
     const users = getLocalUsers();
-    const found = users.find(u => u.nome.toLowerCase() === trimmedNome.toLowerCase());
-    if (!found || found.passwordHash !== senha) {
+    const found = users.find(u => u.nome.trim().toLowerCase() === trimmedNome.toLowerCase());
+    if (!found || found.passwordHash !== trimmedSenha) {
       throw new Error('Credenciais inválidas');
     }
 
@@ -177,6 +212,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const createUser = async (newNome: string, newSenha: string): Promise<UserItem> => {
     const trimmed = newNome.trim();
+    const trimmedSenha = newSenha.trim();
     if (API_BASE && !isStandalone) {
       try {
         const res = await fetch(`${API_BASE}/api/users`, {
@@ -185,7 +221,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-          body: JSON.stringify({ nome: trimmed, senha: newSenha })
+          body: JSON.stringify({ nome: trimmed, senha: trimmedSenha })
         });
         if (!res.ok) {
           const err = await res.json().catch(() => ({}));
@@ -199,16 +235,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Fallback local
     const users = getLocalUsers();
-    if (users.some(u => u.nome.toLowerCase() === trimmed.toLowerCase())) {
+    if (users.some(u => u.nome.trim().toLowerCase() === trimmed.toLowerCase())) {
       throw new Error('Nome de usuário já cadastrado');
     }
-    if (newSenha.length < 6) {
+    if (trimmedSenha.length < 6) {
       throw new Error('A senha deve ter ao menos 6 caracteres');
     }
     const newUser: LocalStoredUser = {
       id: Date.now(),
       nome: trimmed,
-      passwordHash: newSenha
+      passwordHash: trimmedSenha
     };
     users.push(newUser);
     saveLocalUsers(users);

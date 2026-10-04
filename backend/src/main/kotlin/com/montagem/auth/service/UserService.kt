@@ -19,9 +19,11 @@ class UserService(
     private val encoder = BCryptPasswordEncoder(12)
 
     fun login(request: LoginRequest): LoginResponse {
-        val user = userRepository.findByNome(request.nome)
+        val trimmedNome = request.nome.trim()
+        val trimmedSenha = request.senha.trim()
+        val user = userRepository.findByNomeIgnoreCase(trimmedNome)
             .orElseThrow { ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciais inválidas") }
-        if (!encoder.matches(request.senha, user.passwordHash))
+        if (!encoder.matches(trimmedSenha, user.passwordHash))
             throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciais inválidas")
         val token = jwtService.generateToken(user.nome)
         return LoginResponse(token, user.nome, jwtService.getExpirationMs())
@@ -31,12 +33,14 @@ class UserService(
         userRepository.findAll().map { UserResponse(it.id, it.nome) }
 
     fun createUser(request: CreateUserRequest): UserResponse {
-        if (userRepository.existsByNome(request.nome))
+        val trimmedNome = request.nome.trim()
+        val trimmedSenha = request.senha.trim()
+        if (userRepository.existsByNomeIgnoreCase(trimmedNome))
             throw ResponseStatusException(HttpStatus.CONFLICT, "Nome já cadastrado")
-        if (request.senha.length < 6)
+        if (trimmedSenha.length < 6)
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Senha deve ter ao menos 6 caracteres")
-        val hash = encoder.encode(request.senha)
-        val saved = userRepository.save(User(nome = request.nome, passwordHash = hash))
+        val hash = encoder.encode(trimmedSenha)
+        val saved = userRepository.save(User(nome = trimmedNome, passwordHash = hash))
         return UserResponse(saved.id, saved.nome)
     }
 
