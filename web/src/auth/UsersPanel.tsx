@@ -4,7 +4,7 @@ import { useAuth } from './AuthContext';
 interface UserItem { id: number; nome: string; }
 
 export const UsersPanel: React.FC = () => {
-  const { user: currentUser, listUsers, createUser, deleteUser, isStandaloneMode } = useAuth();
+  const { user: currentUser, listUsers, createUser, deleteUser } = useAuth();
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
