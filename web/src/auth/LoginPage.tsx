@@ -95,51 +95,6 @@ export const LoginPage: React.FC = () => {
           <p style={{ color: '#0369A1', fontSize: '0.875rem', marginTop: '0.25rem', fontWeight: 500 }}>
             Acesse sua conta para continuar
           </p>
-          {/* Quick Credential Helpers */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '8px',
-            marginTop: '0.85rem',
-            flexWrap: 'wrap'
-          }}>
-            <button
-              type="button"
-              onClick={() => { setNome('Francesco'); setSenha('240322'); setError(''); }}
-              style={{
-                background: 'rgba(255,255,255,0.7)',
-                border: '1px solid rgba(56,189,248,0.5)',
-                borderRadius: '8px',
-                padding: '4px 10px',
-                fontSize: '0.72rem',
-                color: '#0369A1',
-                cursor: 'pointer',
-                fontWeight: 600,
-                transition: 'all 0.15s ease'
-              }}
-              title="Preencher credenciais de Francesco"
-            >
-              👤 Francesco
-            </button>
-            <button
-              type="button"
-              onClick={() => { setNome('admin'); setSenha('admin123'); setError(''); }}
-              style={{
-                background: 'rgba(255,255,255,0.7)',
-                border: '1px solid rgba(56,189,248,0.5)',
-                borderRadius: '8px',
-                padding: '4px 10px',
-                fontSize: '0.72rem',
-                color: '#0369A1',
-                cursor: 'pointer',
-                fontWeight: 600,
-                transition: 'all 0.15s ease'
-              }}
-              title="Preencher credenciais de admin"
-            >
-              🔑 admin
-            </button>
-          </div>
         </div>
 
         {/* Inactivity Alert */}
