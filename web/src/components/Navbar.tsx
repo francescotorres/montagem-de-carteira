@@ -36,15 +36,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <div>
-                <span className="text-base sm:text-lg font-bold tracking-tight text-slate-800 flex items-center gap-1.5">
+                <span className="text-base sm:text-lg font-bold tracking-tight text-slate-800">
                   Montagem de Carteiras
-                  <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-blue-100 text-blue-700 border border-blue-200">
-                    Online
-                  </span>
                 </span>
-                <p className="text-[11px] text-slate-500 hidden sm:block">
-                  Planejador inteligente de FIIs, Fiagros e ETFs
-                </p>
               </div>
             </div>
 
