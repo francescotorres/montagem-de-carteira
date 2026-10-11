@@ -37,8 +37,23 @@ class UserService(
         val trimmedSenha = request.senha.trim()
         if (userRepository.existsByNomeIgnoreCase(trimmedNome))
             throw ResponseStatusException(HttpStatus.CONFLICT, "Nome já cadastrado")
-        if (trimmedSenha.length < 6)
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Senha deve ter ao menos 6 caracteres")
+        if (trimmedSenha.length < 4)
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Senha deve ter ao menos 4 caracteres")
+
+        // Quando um usuário é cadastrado no sistema, os usuários padrão/placeholder deixam de funcionar
+        userRepository.findByNomeIgnoreCase("admin").ifPresent { adminUser ->
+            if (encoder.matches("123456", adminUser.passwordHash)) {
+                userRepository.delete(adminUser)
+            }
+        }
+        if (!trimmedNome.equals("Francesco", ignoreCase = true)) {
+            userRepository.findByNomeIgnoreCase("Francesco").ifPresent { francescoUser ->
+                if (encoder.matches("123456", francescoUser.passwordHash)) {
+                    userRepository.delete(francescoUser)
+                }
+            }
+        }
+
         val hash = encoder.encode(trimmedSenha)
         val saved = userRepository.save(User(nome = trimmedNome, passwordHash = hash))
         return UserResponse(saved.id, saved.nome)

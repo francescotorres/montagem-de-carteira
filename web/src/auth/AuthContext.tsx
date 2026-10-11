@@ -34,20 +34,29 @@ interface LocalStoredUser {
   id: number;
   nome: string;
   passwordHash: string;
+  isInitialPlaceholder?: boolean;
 }
 
-const DEFAULT_USERS: LocalStoredUser[] = [
-  { id: 1, nome: 'Francesco', passwordHash: '123456' },
-  { id: 2, nome: 'admin', passwordHash: '123456' }
-];
+const INITIAL_PLACEHOLDER_USER: LocalStoredUser = {
+  id: 1,
+  nome: 'Francesco',
+  passwordHash: '123456',
+  isInitialPlaceholder: true
+};
+
+const isPlaceholderUser = (u: LocalStoredUser): boolean => {
+  return Boolean(u.isInitialPlaceholder) ||
+    ((u.nome.toLowerCase() === 'francesco' || u.nome.toLowerCase() === 'admin') && u.passwordHash === '123456');
+};
 
 const getLocalUsers = (): LocalStoredUser[] => {
   try {
     const raw = localStorage.getItem(USERS_DB_KEY);
     if (!raw) {
-      const initialUsers = DEFAULT_USERS.map(u => ({ ...u }));
-      localStorage.setItem(USERS_DB_KEY, JSON.stringify(initialUsers));
-      return initialUsers;
+      // Primeiro acesso antes de cadastrar qualquer usuário: inicializa placeholder
+      const initial = [{ ...INITIAL_PLACEHOLDER_USER }];
+      localStorage.setItem(USERS_DB_KEY, JSON.stringify(initial));
+      return initial;
     }
 
     let users: LocalStoredUser[] = [];
@@ -60,15 +69,19 @@ const getLocalUsers = (): LocalStoredUser[] => {
       users = [];
     }
 
-    // Se todos os usuários forem removidos, preserva Francesco com 123456 para evitar lockout
-    if (users.length === 0) {
-      users = [{ id: 1, nome: 'Francesco', passwordHash: '123456' }];
-      localStorage.setItem(USERS_DB_KEY, JSON.stringify(users));
+    // Se já existem usuários cadastrados (não-placeholder), remove qualquer placeholder inicial
+    const hasRealUsers = users.some(u => !isPlaceholderUser(u));
+    if (hasRealUsers) {
+      const cleaned = users.filter(u => !isPlaceholderUser(u));
+      if (cleaned.length !== users.length) {
+        saveLocalUsers(cleaned);
+        return cleaned;
+      }
     }
 
     return users;
   } catch {
-    return DEFAULT_USERS;
+    return [];
   }
 };
 
@@ -83,11 +96,13 @@ interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   login: (nome: string, senha: string) => Promise<void>;
+  register: (nome: string, senha: string) => Promise<void>;
   logout: (reason?: string) => void;
   listUsers: () => Promise<UserItem[]>;
   createUser: (nome: string, senha: string) => Promise<UserItem>;
   deleteUser: (id: number) => Promise<void>;
   updatePassword: (id: number, novaSenha: string) => Promise<void>;
+  hasRegisteredUsers: () => boolean;
   apiBase: string;
   isStandaloneMode: boolean;
 }
@@ -139,6 +154,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const trimmedNome = nome.trim();
     const trimmedSenha = senha.trim();
 
+    if (!trimmedNome || !trimmedSenha) {
+      throw new Error('Informe o usuário e a senha');
+    }
+
     // Se temos uma API configurada, tentamos a conexão com o backend Kotlin/Spring Boot
     if (API_BASE && !isStandalone) {
       try {
@@ -169,27 +188,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    // Modo Standalone (para Vercel ou quando o backend não está ativo)
+    // Modo Standalone Local: valida estritamente contra os usuários cadastrados
     const users = getLocalUsers();
-    let found = users.find(u => u.nome.trim().toLowerCase() === trimmedNome.toLowerCase());
+    const found = users.find(u => u.nome.trim().toLowerCase() === trimmedNome.toLowerCase());
 
-    // Se o usuário digitou Francesco ou admin, mas por algum motivo não estava na lista
-    if (!found && (trimmedNome.toLowerCase() === 'francesco' || trimmedNome.toLowerCase() === 'admin')) {
-      found = { id: 1, nome: trimmedNome, passwordHash: '123456' };
-      users.push(found);
-      saveLocalUsers(users);
-    }
-
-    const isMasterPassword = trimmedSenha === '123456';
-    const isPasswordValid = found && (found.passwordHash === trimmedSenha || isMasterPassword);
-
-    if (!found || !isPasswordValid) {
+    if (!found || found.passwordHash !== trimmedSenha) {
       throw new Error('Credenciais inválidas');
-    }
-
-    if (found && isMasterPassword && found.passwordHash !== '123456') {
-      found.passwordHash = '123456';
-      saveLocalUsers(users);
     }
 
     const mockToken = `local-jwt-${Date.now()}-${Math.random().toString(36).substring(2)}`;
@@ -197,6 +201,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser({ nome: found.nome });
     localStorage.setItem(TOKEN_KEY, mockToken);
     localStorage.setItem(USER_KEY, JSON.stringify({ nome: found.nome }));
+    sessionStorage.removeItem('logout_reason');
+  };
+
+  const register = async (newNome: string, newSenha: string): Promise<void> => {
+    const trimmedNome = newNome.trim();
+    const trimmedSenha = newSenha.trim();
+
+    if (trimmedNome.length < 2) {
+      throw new Error('Nome de usuário deve ter ao menos 2 caracteres');
+    }
+    if (trimmedSenha.length < 4) {
+      throw new Error('A senha deve ter ao menos 4 caracteres');
+    }
+
+    if (API_BASE && !isStandalone) {
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome: trimmedNome, senha: trimmedSenha })
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error((err as { message?: string }).message || 'Erro ao registrar usuário');
+        }
+        const data = await res.json();
+        setToken(data.token);
+        setUser({ nome: data.nome });
+        localStorage.setItem(TOKEN_KEY, data.token);
+        localStorage.setItem(USER_KEY, JSON.stringify({ nome: data.nome }));
+        sessionStorage.removeItem('logout_reason');
+        return;
+      } catch (err: unknown) {
+        const isNetworkErr = err instanceof TypeError && (err.message.includes('fetch') || err.message.includes('Failed'));
+        if (!isNetworkErr) throw err;
+        setIsStandalone(true);
+      }
+    }
+
+    // Standalone Local
+    const created = await createUser(trimmedNome, trimmedSenha);
+    const mockToken = `local-jwt-${Date.now()}-${Math.random().toString(36).substring(2)}`;
+    setToken(mockToken);
+    setUser({ nome: created.nome });
+    localStorage.setItem(TOKEN_KEY, mockToken);
+    localStorage.setItem(USER_KEY, JSON.stringify({ nome: created.nome }));
     sessionStorage.removeItem('logout_reason');
   };
 
@@ -222,6 +272,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const createUser = async (newNome: string, newSenha: string): Promise<UserItem> => {
     const trimmed = newNome.trim();
     const trimmedSenha = newSenha.trim();
+    if (trimmed.length < 2) {
+      throw new Error('Nome de usuário deve ter ao menos 2 caracteres');
+    }
+    if (trimmedSenha.length < 4) {
+      throw new Error('A senha deve ter ao menos 4 caracteres');
+    }
+
     if (API_BASE && !isStandalone) {
       try {
         const res = await fetch(`${API_BASE}/api/users`, {
@@ -242,21 +299,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    // Fallback local
-    const users = getLocalUsers();
-    if (users.some(u => u.nome.trim().toLowerCase() === trimmed.toLowerCase())) {
+    // Fallback local: quando um novo usuário é cadastrado, qualquer usuário padrão/placeholder deixa de funcionar
+    const currentUsers = getLocalUsers().filter(u => !isPlaceholderUser(u));
+    if (currentUsers.some(u => u.nome.trim().toLowerCase() === trimmed.toLowerCase())) {
       throw new Error('Nome de usuário já cadastrado');
-    }
-    if (trimmedSenha.length < 6) {
-      throw new Error('A senha deve ter ao menos 6 caracteres');
     }
     const newUser: LocalStoredUser = {
       id: Date.now(),
       nome: trimmed,
-      passwordHash: trimmedSenha
+      passwordHash: trimmedSenha,
+      isInitialPlaceholder: false
     };
-    users.push(newUser);
-    saveLocalUsers(users);
+    currentUsers.push(newUser);
+    saveLocalUsers(currentUsers);
     return { id: newUser.id, nome: newUser.nome };
   };
 
@@ -290,6 +345,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const target = users.find(u => u.id === id);
     if (!target) throw new Error('Usuário não encontrado');
     target.passwordHash = trimmedSenha;
+    target.isInitialPlaceholder = false;
     saveLocalUsers(users);
   };
 
@@ -318,10 +374,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    let updated = users.filter(u => u.id !== id);
-    if (updated.length === 0) {
-      updated = [{ id: 1, nome: 'Francesco', passwordHash: '123456' }];
-    }
+    const updated = users.filter(u => u.id !== id);
     saveLocalUsers(updated);
 
     if (wasSelf) {
@@ -329,17 +382,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const hasRegisteredUsers = useCallback(() => {
+    const users = getLocalUsers();
+    return users.some(u => !isPlaceholderUser(u));
+  }, []);
+
   return (
     <AuthContext.Provider value={{
       user,
       token,
       isAuthenticated: !!token && !!user,
       login,
+      register,
       logout,
       listUsers,
       createUser,
       deleteUser,
       updatePassword,
+      hasRegisteredUsers,
       apiBase: API_BASE,
       isStandaloneMode: isStandalone
     }}>

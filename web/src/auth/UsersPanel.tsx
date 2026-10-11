@@ -273,7 +273,7 @@ export const UsersPanel: React.FC = () => {
                     type={showEditingPass ? 'text' : 'password'}
                     value={editingPassword}
                     onChange={e => setEditingPassword(e.target.value)}
-                    placeholder="Mínimo 4 caracteres (ex: 123456)"
+                    placeholder="Mínimo 4 caracteres"
                     required
                     style={inputStyle}
                   />
@@ -304,24 +304,6 @@ export const UsersPanel: React.FC = () => {
                   style={inputStyle}
                 />
               </div>
-
-              {/* Botão rápido para definir 123456 */}
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingPassword('123456');
-                  setConfirmEditingPassword('123456');
-                  setPasswordModalError('');
-                }}
-                style={{
-                  background: 'rgba(56,189,248,0.12)', border: '1px dashed #0284C7',
-                  borderRadius: '8px', padding: '8px', fontSize: '0.78rem',
-                  color: '#0284C7', cursor: 'pointer', fontWeight: 600,
-                  textAlign: 'center'
-                }}
-              >
-                💡 Usar a senha padrão <strong>123456</strong>
-              </button>
 
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
                 <button

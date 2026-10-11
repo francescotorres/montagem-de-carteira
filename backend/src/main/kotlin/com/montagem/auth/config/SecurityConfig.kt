@@ -20,7 +20,7 @@ class SecurityConfig(private val jwtAuthFilter: JwtAuthFilter) {
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
                 auth
-                    .requestMatchers("/api/auth/login").permitAll()
+                    .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .anyRequest().authenticated()
             }

@@ -10,9 +10,11 @@ const BLOBS = [
 ];
 
 export const LoginPage: React.FC = () => {
-  const { login } = useAuth();
-  const [nome, setNome] = useState('Francesco');
-  const [senha, setSenha] = useState('123456');
+  const { login, register } = useAuth();
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [nome, setNome] = useState('');
+  const [senha, setSenha] = useState('');
+  const [confirmSenha, setConfirmSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -28,11 +30,39 @@ export const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    const trimmedNome = nome.trim();
+    const trimmedSenha = senha.trim();
+
+    if (!trimmedNome) {
+      setError('Informe o nome de usuário');
+      return;
+    }
+    if (!trimmedSenha) {
+      setError('Informe a senha');
+      return;
+    }
+
+    if (isRegistering) {
+      if (trimmedSenha.length < 4) {
+        setError('A senha deve ter no mínimo 4 caracteres');
+        return;
+      }
+      if (trimmedSenha !== confirmSenha.trim()) {
+        setError('As senhas não coincidem');
+        return;
+      }
+    }
+
     setLoading(true);
     try {
-      await login(nome.trim(), senha.trim());
+      if (isRegistering) {
+        await register(trimmedNome, trimmedSenha);
+      } else {
+        await login(trimmedNome, trimmedSenha);
+      }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erro ao fazer login');
+      setError(err instanceof Error ? err.message : 'Erro ao autenticar');
     } finally {
       setLoading(false);
     }
@@ -77,7 +107,7 @@ export const LoginPage: React.FC = () => {
         boxSizing: 'border-box'
       }}>
         {/* Logo / Title */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
           <div style={{
             width: 64, height: 64, borderRadius: '50%',
             background: 'linear-gradient(135deg, #38BDF8, #0284C7)',
@@ -90,12 +120,24 @@ export const LoginPage: React.FC = () => {
             </svg>
           </div>
           <h1 style={{ fontFamily: "'Inter', 'Poppins', system-ui, sans-serif", fontSize: '1.5rem', fontWeight: 700, color: '#0C4A6E', margin: 0 }}>
-            Montagem de Carteiras
+            {isRegistering ? 'Novo Cadastro' : 'Montagem de Carteiras'}
           </h1>
           <p style={{ color: '#0369A1', fontSize: '0.875rem', marginTop: '0.25rem', fontWeight: 500 }}>
-            Acesse sua conta para continuar
+            {isRegistering ? 'Cadastre seu usuário para acessar o sistema' : 'Acesse com seu usuário e senha cadastrados'}
           </p>
         </div>
+
+        {/* Notice for registration */}
+        {isRegistering && (
+          <div style={{
+            background: 'rgba(56,189,248,0.2)', borderRadius: '12px',
+            border: '1px solid rgba(56,189,248,0.5)',
+            padding: '0.65rem 0.9rem', marginBottom: '1.25rem',
+            color: '#0369A1', fontSize: '0.78rem', lineHeight: '1.4'
+          }}>
+            ℹ️ Ao cadastrar um usuário, qualquer acesso padrão inicial deixa de funcionar automaticamente.
+          </div>
+        )}
 
         {/* Inactivity Alert */}
         {inactivityMsg && (
@@ -121,10 +163,10 @@ export const LoginPage: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
           {/* Nome Field */}
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#0369A1', marginBottom: '0.5rem', fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#0369A1', marginBottom: '0.4rem', fontFamily: "'Inter', system-ui, sans-serif" }}>
               Nome de Usuário
             </label>
             <div style={{ position: 'relative' }}>
@@ -135,7 +177,8 @@ export const LoginPage: React.FC = () => {
               </span>
               <input
                 type="text" value={nome} onChange={e => setNome(e.target.value)}
-                placeholder="Seu nome de usuário" required autoFocus
+                placeholder={isRegistering ? 'Nome do novo usuário' : 'Seu usuário cadastrado'}
+                required autoFocus
                 autoCapitalize="none"
                 autoCorrect="off"
                 spellCheck={false}
@@ -161,7 +204,7 @@ export const LoginPage: React.FC = () => {
 
           {/* Senha Field */}
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#0369A1', marginBottom: '0.5rem', fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#0369A1', marginBottom: '0.4rem', fontFamily: "'Inter', system-ui, sans-serif" }}>
               Senha
             </label>
             <div style={{ position: 'relative' }}>
@@ -172,11 +215,12 @@ export const LoginPage: React.FC = () => {
               </span>
               <input
                 type={showPass ? 'text' : 'password'} value={senha} onChange={e => setSenha(e.target.value)}
-                placeholder="Sua senha (ex: 123456)" required
+                placeholder={isRegistering ? 'Mínimo 4 caracteres' : 'Sua senha'}
+                required
                 autoCapitalize="none"
                 autoCorrect="off"
                 spellCheck={false}
-                autoComplete="current-password"
+                autoComplete={isRegistering ? 'new-password' : 'current-password'}
                 style={{
                   width: '100%', paddingLeft: '44px', paddingRight: '48px',
                   paddingTop: '12px', paddingBottom: '12px',
@@ -204,34 +248,43 @@ export const LoginPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick Helper Button */}
-          <button
-            type="button"
-            onClick={() => {
-              setNome('Francesco');
-              setSenha('123456');
-              setError('');
-            }}
-            style={{
-              background: 'rgba(255,255,255,0.6)',
-              border: '1px solid rgba(56,189,248,0.4)',
-              borderRadius: '10px',
-              padding: '8px 12px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              color: '#0284C7',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              transition: 'background 0.2s',
-            }}
-            onMouseEnter={e => { (e.currentTarget).style.background = 'rgba(255,255,255,0.9)'; }}
-            onMouseLeave={e => { (e.currentTarget).style.background = 'rgba(255,255,255,0.6)'; }}
-          >
-            <span>🔑 Preencher usuário <strong>Francesco</strong> e senha <strong>123456</strong></span>
-          </button>
+          {/* Confirmar Senha Field (only in register mode) */}
+          {isRegistering && (
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#0369A1', marginBottom: '0.4rem', fontFamily: "'Inter', system-ui, sans-serif" }}>
+                Confirmar Senha
+              </label>
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                </span>
+                <input
+                  type={showPass ? 'text' : 'password'} value={confirmSenha} onChange={e => setConfirmSenha(e.target.value)}
+                  placeholder="Repita a senha" required
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  autoComplete="new-password"
+                  style={{
+                    width: '100%', paddingLeft: '44px', paddingRight: '14px',
+                    paddingTop: '12px', paddingBottom: '12px',
+                    background: 'rgba(255,255,255,0.55)',
+                    backdropFilter: 'blur(8px)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(56,189,248,0.4)',
+                    outline: 'none', fontSize: '0.95rem',
+                    color: '#0C4A6E', fontFamily: "'Inter', system-ui, sans-serif",
+                    boxSizing: 'border-box',
+                    transition: 'border-color 0.2s, box-shadow 0.2s'
+                  }}
+                  onFocus={e => { e.target.style.borderColor = 'rgba(2,132,199,0.7)'; e.target.style.boxShadow = '0 0 0 3px rgba(56,189,248,0.2)'; }}
+                  onBlur={e => { e.target.style.borderColor = 'rgba(56,189,248,0.4)'; e.target.style.boxShadow = 'none'; }}
+                />
+              </div>
+            </div>
+          )}
 
           {/* Submit Button */}
           <button
@@ -246,7 +299,8 @@ export const LoginPage: React.FC = () => {
               cursor: loading ? 'not-allowed' : 'pointer',
               boxShadow: '0 4px 15px rgba(2,132,199,0.4)',
               transition: 'all 0.2s ease',
-              letterSpacing: '0.02em'
+              letterSpacing: '0.02em',
+              marginTop: '0.5rem'
             }}
             onMouseEnter={e => { if (!loading) { (e.currentTarget).style.transform = 'translateY(-2px)'; (e.currentTarget).style.boxShadow = '0 6px 20px rgba(2,132,199,0.5)'; } }}
             onMouseLeave={e => { (e.currentTarget).style.transform = 'translateY(0)'; (e.currentTarget).style.boxShadow = '0 4px 15px rgba(2,132,199,0.4)'; }}
@@ -254,13 +308,39 @@ export const LoginPage: React.FC = () => {
             {loading ? (
               <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                 <span style={{ display: 'inline-block', width: 16, height: 16, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                Entrando...
+                {isRegistering ? 'Cadastrando...' : 'Entrando...'}
               </span>
-            ) : 'Entrar'}
+            ) : (isRegistering ? 'Cadastrar e Acessar' : 'Entrar')}
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#0369A1', marginTop: '1.5rem', opacity: 0.7 }}>
+        {/* Toggle between Login and Register */}
+        <div style={{ textAlign: 'center', marginTop: '1.25rem' }}>
+          <button
+            type="button"
+            onClick={() => {
+              setIsRegistering(!isRegistering);
+              setError('');
+              setConfirmSenha('');
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#0284C7',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              padding: '6px 12px',
+              borderRadius: '8px',
+              textDecoration: 'underline',
+              fontFamily: "'Inter', system-ui, sans-serif"
+            }}
+          >
+            {isRegistering ? '← Já possui uma conta? Fazer login' : '+ Criar novo usuário no sistema'}
+          </button>
+        </div>
+
+        <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#0369A1', marginTop: '1.25rem', opacity: 0.7 }}>
           Sessão expira automaticamente após 2h de inatividade
         </p>
       </div>
