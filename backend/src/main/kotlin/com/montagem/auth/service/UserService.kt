@@ -70,6 +70,9 @@ class UserService(
     }
 
     fun deleteUser(id: Long, currentNome: String) {
+        if (userRepository.count() <= 1L) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Não é permitido excluir o único usuário do sistema")
+        }
         val user = userRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado") }
         userRepository.deleteById(id)

@@ -59,6 +59,10 @@ export const UsersPanel: React.FC = () => {
   };
 
   const handleDelete = async (id: number, nome: string) => {
+    if (users.length <= 1) {
+      showToastMsg('⚠️ Não é permitido excluir o único usuário do sistema.');
+      return;
+    }
     const isSelf = Boolean(currentUser && nome.toLowerCase() === currentUser.nome.toLowerCase());
     const promptMsg = isSelf
       ? `Você está prestes a excluir sua própria conta "${nome}". Sua sessão será encerrada e você será desconectado. Deseja continuar?`
@@ -212,15 +216,18 @@ export const UsersPanel: React.FC = () => {
 
                 <button
                   onClick={() => handleDelete(u.id, u.nome)}
-                  disabled={deletingId === u.id}
-                  title="Excluir este usuário"
+                  disabled={deletingId === u.id || users.length <= 1}
+                  title={users.length <= 1 ? "Não é permitido excluir o único usuário do sistema" : "Excluir este usuário"}
                   style={{
-                    background: 'rgba(239,68,68,0.1)', color: '#DC2626',
-                    border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px',
+                    background: users.length <= 1 ? 'rgba(156,163,175,0.1)' : 'rgba(239,68,68,0.1)',
+                    color: users.length <= 1 ? '#9CA3AF' : '#DC2626',
+                    border: users.length <= 1 ? '1px solid rgba(156,163,175,0.3)' : '1px solid rgba(239,68,68,0.3)',
+                    borderRadius: '8px',
                     padding: '6px 12px', fontSize: '0.78rem', fontWeight: 600,
-                    cursor: deletingId === u.id ? 'not-allowed' : 'pointer',
+                    cursor: (deletingId === u.id || users.length <= 1) ? 'not-allowed' : 'pointer',
                     fontFamily: "'Inter', system-ui, sans-serif",
-                    transition: 'all 0.2s'
+                    transition: 'all 0.2s',
+                    opacity: users.length <= 1 ? 0.6 : 1
                   }}
                 >
                   {deletingId === u.id ? '...' : '🗑 Excluir'}

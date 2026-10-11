@@ -96,7 +96,6 @@ interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   login: (nome: string, senha: string) => Promise<void>;
-  register: (nome: string, senha: string) => Promise<void>;
   logout: (reason?: string) => void;
   listUsers: () => Promise<UserItem[]>;
   createUser: (nome: string, senha: string) => Promise<UserItem>;
@@ -204,52 +203,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sessionStorage.removeItem('logout_reason');
   };
 
-  const register = async (newNome: string, newSenha: string): Promise<void> => {
-    const trimmedNome = newNome.trim();
-    const trimmedSenha = newSenha.trim();
-
-    if (trimmedNome.length < 2) {
-      throw new Error('Nome de usuário deve ter ao menos 2 caracteres');
-    }
-    if (trimmedSenha.length < 4) {
-      throw new Error('A senha deve ter ao menos 4 caracteres');
-    }
-
-    if (API_BASE && !isStandalone) {
-      try {
-        const res = await fetch(`${API_BASE}/api/auth/register`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nome: trimmedNome, senha: trimmedSenha })
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error((err as { message?: string }).message || 'Erro ao registrar usuário');
-        }
-        const data = await res.json();
-        setToken(data.token);
-        setUser({ nome: data.nome });
-        localStorage.setItem(TOKEN_KEY, data.token);
-        localStorage.setItem(USER_KEY, JSON.stringify({ nome: data.nome }));
-        sessionStorage.removeItem('logout_reason');
-        return;
-      } catch (err: unknown) {
-        const isNetworkErr = err instanceof TypeError && (err.message.includes('fetch') || err.message.includes('Failed'));
-        if (!isNetworkErr) throw err;
-        setIsStandalone(true);
-      }
-    }
-
-    // Standalone Local
-    const created = await createUser(trimmedNome, trimmedSenha);
-    const mockToken = `local-jwt-${Date.now()}-${Math.random().toString(36).substring(2)}`;
-    setToken(mockToken);
-    setUser({ nome: created.nome });
-    localStorage.setItem(TOKEN_KEY, mockToken);
-    localStorage.setItem(USER_KEY, JSON.stringify({ nome: created.nome }));
-    sessionStorage.removeItem('logout_reason');
-  };
-
   const listUsers = async (): Promise<UserItem[]> => {
     if (API_BASE && !isStandalone) {
       try {
@@ -351,6 +304,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const deleteUser = async (id: number): Promise<void> => {
     const users = getLocalUsers();
+    if (users.length <= 1) {
+      throw new Error('Não é permitido excluir o único usuário do sistema');
+    }
     const target = users.find(u => u.id === id);
     if (!target) throw new Error('Usuário não encontrado');
 
@@ -393,7 +349,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       token,
       isAuthenticated: !!token && !!user,
       login,
-      register,
       logout,
       listUsers,
       createUser,
