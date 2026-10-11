@@ -14,31 +14,44 @@ class DataInitializer(
     @Bean
     fun initDatabase(): CommandLineRunner = CommandLineRunner {
         val encoder = BCryptPasswordEncoder(12)
-        if (!userRepository.existsByNome("Francesco")) {
+        val defaultPassword = "123456"
+
+        val francescoOpt = userRepository.findByNomeIgnoreCase("Francesco")
+        if (francescoOpt.isEmpty) {
             userRepository.save(
                 User(
                     nome = "Francesco",
-                    passwordHash = encoder.encode("240322")
+                    passwordHash = encoder.encode(defaultPassword)
                 )
             )
-            println("==================================================")
-            println("  Usuário Francesco inicializado:")
-            println("  Usuário: Francesco")
-            println("  Senha:   240322")
-            println("==================================================")
+        } else {
+            val user = francescoOpt.get()
+            user.passwordHash = encoder.encode(defaultPassword)
+            userRepository.save(user)
         }
-        if (!userRepository.existsByNome("admin")) {
+        println("==================================================")
+        println("  Usuário Francesco inicializado/atualizado:")
+        println("  Usuário: Francesco")
+        println("  Senha:   $defaultPassword")
+        println("==================================================")
+
+        val adminOpt = userRepository.findByNomeIgnoreCase("admin")
+        if (adminOpt.isEmpty) {
             userRepository.save(
                 User(
                     nome = "admin",
-                    passwordHash = encoder.encode("admin123")
+                    passwordHash = encoder.encode(defaultPassword)
                 )
             )
-            println("==================================================")
-            println("  Usuário admin inicializado:")
-            println("  Usuário: admin")
-            println("  Senha:   admin123")
-            println("==================================================")
+        } else {
+            val user = adminOpt.get()
+            user.passwordHash = encoder.encode(defaultPassword)
+            userRepository.save(user)
         }
+        println("==================================================")
+        println("  Usuário admin inicializado/atualizado:")
+        println("  Usuário: admin")
+        println("  Senha:   $defaultPassword")
+        println("==================================================")
     }
 }

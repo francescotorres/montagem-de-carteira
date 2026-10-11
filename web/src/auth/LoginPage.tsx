@@ -11,8 +11,8 @@ const BLOBS = [
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
-  const [nome, setNome] = useState('');
-  const [senha, setSenha] = useState('');
+  const [nome, setNome] = useState('Francesco');
+  const [senha, setSenha] = useState('123456');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -172,7 +172,7 @@ export const LoginPage: React.FC = () => {
               </span>
               <input
                 type={showPass ? 'text' : 'password'} value={senha} onChange={e => setSenha(e.target.value)}
-                placeholder="Sua senha" required
+                placeholder="Sua senha (ex: 123456)" required
                 autoCapitalize="none"
                 autoCorrect="off"
                 spellCheck={false}
@@ -203,6 +203,35 @@ export const LoginPage: React.FC = () => {
               </button>
             </div>
           </div>
+
+          {/* Quick Helper Button */}
+          <button
+            type="button"
+            onClick={() => {
+              setNome('Francesco');
+              setSenha('123456');
+              setError('');
+            }}
+            style={{
+              background: 'rgba(255,255,255,0.6)',
+              border: '1px solid rgba(56,189,248,0.4)',
+              borderRadius: '10px',
+              padding: '8px 12px',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              color: '#0284C7',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={e => { (e.currentTarget).style.background = 'rgba(255,255,255,0.9)'; }}
+            onMouseLeave={e => { (e.currentTarget).style.background = 'rgba(255,255,255,0.6)'; }}
+          >
+            <span>🔑 Preencher usuário <strong>Francesco</strong> e senha <strong>123456</strong></span>
+          </button>
 
           {/* Submit Button */}
           <button
