@@ -44,11 +44,19 @@ class UserService(
         return UserResponse(saved.id, saved.nome)
     }
 
+    fun updatePassword(id: Long, newSenha: String) {
+        val trimmed = newSenha.trim()
+        if (trimmed.length < 4)
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Senha deve ter ao menos 4 caracteres")
+        val user = userRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado") }
+        user.passwordHash = encoder.encode(trimmed)
+        userRepository.save(user)
+    }
+
     fun deleteUser(id: Long, currentNome: String) {
         val user = userRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado") }
-        if (user.nome == currentNome)
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Você não pode excluir a si mesmo")
         userRepository.deleteById(id)
     }
 }

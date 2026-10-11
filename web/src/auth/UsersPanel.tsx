@@ -4,7 +4,7 @@ import { useAuth } from './AuthContext';
 interface UserItem { id: number; nome: string; }
 
 export const UsersPanel: React.FC = () => {
-  const { user: currentUser, listUsers, createUser, deleteUser } = useAuth();
+  const { user: currentUser, listUsers, createUser, deleteUser, updatePassword } = useAuth();
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -14,6 +14,14 @@ export const UsersPanel: React.FC = () => {
   const [modalError, setModalError] = useState('');
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [toast, setToast] = useState('');
+
+  // Password change modal state
+  const [passwordModalUser, setPasswordModalUser] = useState<UserItem | null>(null);
+  const [editingPassword, setEditingPassword] = useState('');
+  const [confirmEditingPassword, setConfirmEditingPassword] = useState('');
+  const [showEditingPass, setShowEditingPass] = useState(false);
+  const [passwordModalError, setPasswordModalError] = useState('');
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   const showToastMsg = (msg: string) => {
     setToast(msg);
@@ -38,7 +46,7 @@ export const UsersPanel: React.FC = () => {
     e.preventDefault();
     setModalError('');
     if (newSenha !== confirmSenha) { setModalError('As senhas não coincidem'); return; }
-    if (newSenha.length < 6) { setModalError('Senha deve ter ao menos 6 caracteres'); return; }
+    if (newSenha.length < 4) { setModalError('Senha deve ter ao menos 4 caracteres'); return; }
     try {
       await createUser(newNome, newSenha);
       setShowModal(false);
@@ -51,12 +59,20 @@ export const UsersPanel: React.FC = () => {
   };
 
   const handleDelete = async (id: number, nome: string) => {
-    if (!window.confirm(`Tem certeza que deseja excluir o usuário "${nome}"?`)) return;
+    const isSelf = Boolean(currentUser && nome.toLowerCase() === currentUser.nome.toLowerCase());
+    const promptMsg = isSelf
+      ? `Você está prestes a excluir sua própria conta "${nome}". Sua sessão será encerrada e você será desconectado. Deseja continuar?`
+      : `Tem certeza que deseja excluir o usuário "${nome}"?`;
+
+    if (!window.confirm(promptMsg)) return;
+
     setDeletingId(id);
     try {
       await deleteUser(id);
       showToastMsg('🗑️ Usuário excluído com sucesso!');
-      fetchUsers();
+      if (!isSelf) {
+        fetchUsers();
+      }
     } catch (err: unknown) {
       showToastMsg(err instanceof Error ? err.message : 'Erro ao excluir usuário');
     } finally {
@@ -64,13 +80,41 @@ export const UsersPanel: React.FC = () => {
     }
   };
 
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passwordModalUser) return;
+    setPasswordModalError('');
+
+    if (editingPassword !== confirmEditingPassword) {
+      setPasswordModalError('As senhas não coincidem');
+      return;
+    }
+    if (editingPassword.length < 4) {
+      setPasswordModalError('A senha deve ter no mínimo 4 caracteres');
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      await updatePassword(passwordModalUser.id, editingPassword);
+      showToastMsg(`✅ Senha de "${passwordModalUser.nome}" alterada com sucesso!`);
+      setPasswordModalUser(null);
+      setEditingPassword('');
+      setConfirmEditingPassword('');
+    } catch (err: unknown) {
+      setPasswordModalError(err instanceof Error ? err.message : 'Erro ao alterar senha');
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
+
   const glassCard: React.CSSProperties = {
-    background: 'rgba(255,255,255,0.55)',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
+    background: 'rgba(255,255,255,0.7)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
     borderRadius: '16px',
-    border: '1px solid rgba(255,255,255,0.7)',
-    boxShadow: '0 4px 20px rgba(31,147,255,0.1)'
+    border: '1px solid rgba(255,255,255,0.8)',
+    boxShadow: '0 8px 32px rgba(31,147,255,0.15)'
   };
 
   const inputStyle: React.CSSProperties = {
@@ -78,7 +122,7 @@ export const UsersPanel: React.FC = () => {
     padding: '10px 14px',
     borderRadius: '10px',
     border: '1px solid rgba(56,189,248,0.4)',
-    background: 'rgba(255,255,255,0.8)',
+    background: 'rgba(255,255,255,0.9)',
     outline: 'none',
     fontSize: '0.9rem',
     color: '#0C4A6E',
@@ -91,7 +135,7 @@ export const UsersPanel: React.FC = () => {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
         <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#0C4A6E', fontFamily: "'Inter', system-ui, sans-serif" }}>
-          👥 Gerenciar Usuários
+          👥 Gerenciar Usuários e Senhas
         </h2>
         <button
           onClick={() => { setShowModal(true); setModalError(''); setNewNome(''); setNewSenha(''); setConfirmSenha(''); }}
@@ -119,8 +163,9 @@ export const UsersPanel: React.FC = () => {
           {users.map(u => (
             <div key={u.id} style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              background: 'rgba(255,255,255,0.7)', borderRadius: '12px',
-              border: '1px solid rgba(186,230,253,0.6)', padding: '0.75rem 1rem'
+              background: 'rgba(255,255,255,0.85)', borderRadius: '12px',
+              border: '1px solid rgba(186,230,253,0.7)', padding: '0.75rem 1rem',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{
@@ -136,28 +181,179 @@ export const UsersPanel: React.FC = () => {
                   {u.nome === currentUser?.nome && (
                     <span style={{
                       marginLeft: 8, fontSize: '0.7rem',
-                      background: 'rgba(56,189,248,0.2)', color: '#0369A1',
-                      padding: '2px 8px', borderRadius: '20px'
+                      background: 'rgba(56,189,248,0.25)', color: '#0369A1',
+                      padding: '2px 8px', borderRadius: '20px', fontWeight: 700
                     }}>você</span>
                   )}
                 </span>
               </div>
-              <button
-                onClick={() => handleDelete(u.id, u.nome)}
-                disabled={deletingId === u.id}
-                style={{
-                  background: 'rgba(239,68,68,0.1)', color: '#DC2626',
-                  border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px',
-                  padding: '6px 12px', fontSize: '0.78rem', fontWeight: 600,
-                  cursor: deletingId === u.id ? 'not-allowed' : 'pointer',
-                  fontFamily: "'Inter', system-ui, sans-serif",
-                  transition: 'all 0.2s'
-                }}
-              >
-                {deletingId === u.id ? '...' : '🗑 Excluir'}
-              </button>
+
+              {/* Action Buttons: Change Password & Delete */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                  onClick={() => {
+                    setPasswordModalUser(u);
+                    setEditingPassword('');
+                    setConfirmEditingPassword('');
+                    setPasswordModalError('');
+                  }}
+                  title="Alterar senha deste usuário"
+                  style={{
+                    background: 'rgba(56,189,248,0.15)', color: '#0284C7',
+                    border: '1px solid rgba(56,189,248,0.4)', borderRadius: '8px',
+                    padding: '6px 12px', fontSize: '0.78rem', fontWeight: 600,
+                    cursor: 'pointer', fontFamily: "'Inter', system-ui, sans-serif",
+                    display: 'flex', alignItems: 'center', gap: '4px',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  🔑 Alterar Senha
+                </button>
+
+                <button
+                  onClick={() => handleDelete(u.id, u.nome)}
+                  disabled={deletingId === u.id}
+                  title="Excluir este usuário"
+                  style={{
+                    background: 'rgba(239,68,68,0.1)', color: '#DC2626',
+                    border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px',
+                    padding: '6px 12px', fontSize: '0.78rem', fontWeight: 600,
+                    cursor: deletingId === u.id ? 'not-allowed' : 'pointer',
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {deletingId === u.id ? '...' : '🗑 Excluir'}
+                </button>
+              </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Change Password Modal */}
+      {passwordModalUser && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 1000,
+          background: 'rgba(12,74,110,0.4)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}
+          onClick={e => { if (e.target === e.currentTarget) setPasswordModalUser(null); }}
+        >
+          <div style={{
+            ...glassCard, padding: '2rem',
+            width: '100%', maxWidth: '400px', margin: '1rem',
+            background: 'rgba(255,255,255,0.92)'
+          }}>
+            <h3 style={{ margin: '0 0 0.5rem', color: '#0C4A6E', fontFamily: "'Inter', system-ui, sans-serif" }}>
+              🔑 Alterar Senha
+            </h3>
+            <p style={{ margin: '0 0 1.25rem', fontSize: '0.85rem', color: '#0369A1' }}>
+              Defina a nova senha para o usuário <strong>{passwordModalUser.nome}</strong>:
+            </p>
+
+            {passwordModalError && (
+              <div style={{
+                background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)',
+                borderRadius: '8px', padding: '0.6rem 1rem', marginBottom: '1rem',
+                color: '#991B1B', fontSize: '0.82rem'
+              }}>
+                {passwordModalError}
+              </div>
+            )}
+
+            <form onSubmit={handleUpdatePassword} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#0369A1', marginBottom: '0.4rem' }}>
+                  Nova Senha
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showEditingPass ? 'text' : 'password'}
+                    value={editingPassword}
+                    onChange={e => setEditingPassword(e.target.value)}
+                    placeholder="Mínimo 4 caracteres (ex: 123456)"
+                    required
+                    style={inputStyle}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowEditingPass(!showEditingPass)}
+                    style={{
+                      position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+                      background: 'none', border: 'none', cursor: 'pointer', color: '#0284C7', fontSize: '0.78rem',
+                      fontWeight: 600
+                    }}
+                  >
+                    {showEditingPass ? 'Ocultar' : 'Exibir'}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#0369A1', marginBottom: '0.4rem' }}>
+                  Confirmar Nova Senha
+                </label>
+                <input
+                  type={showEditingPass ? 'text' : 'password'}
+                  value={confirmEditingPassword}
+                  onChange={e => setConfirmEditingPassword(e.target.value)}
+                  placeholder="Repita a nova senha"
+                  required
+                  style={inputStyle}
+                />
+              </div>
+
+              {/* Botão rápido para definir 123456 */}
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingPassword('123456');
+                  setConfirmEditingPassword('123456');
+                  setPasswordModalError('');
+                }}
+                style={{
+                  background: 'rgba(56,189,248,0.12)', border: '1px dashed #0284C7',
+                  borderRadius: '8px', padding: '8px', fontSize: '0.78rem',
+                  color: '#0284C7', cursor: 'pointer', fontWeight: 600,
+                  textAlign: 'center'
+                }}
+              >
+                💡 Usar a senha padrão <strong>123456</strong>
+              </button>
+
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setPasswordModalUser(null)}
+                  style={{
+                    flex: 1, padding: '10px', borderRadius: '10px',
+                    border: '1px solid rgba(186,230,253,0.8)',
+                    background: 'rgba(255,255,255,0.7)', color: '#0369A1',
+                    fontWeight: 600, cursor: 'pointer', fontSize: '0.9rem',
+                    fontFamily: "'Inter', system-ui, sans-serif"
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdatingPassword}
+                  style={{
+                    flex: 1, padding: '10px', borderRadius: '10px',
+                    border: 'none',
+                    background: isUpdatingPassword ? 'rgba(2,132,199,0.5)' : 'linear-gradient(135deg, #38BDF8, #0284C7)',
+                    color: 'white', fontWeight: 700, cursor: isUpdatingPassword ? 'not-allowed' : 'pointer',
+                    fontSize: '0.9rem', boxShadow: '0 2px 8px rgba(2,132,199,0.3)',
+                    fontFamily: "'Inter', system-ui, sans-serif"
+                  }}
+                >
+                  {isUpdatingPassword ? 'Salvando...' : 'Salvar Senha'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
@@ -174,7 +370,7 @@ export const UsersPanel: React.FC = () => {
           <div style={{
             ...glassCard, padding: '2rem',
             width: '100%', maxWidth: '400px', margin: '1rem',
-            background: 'rgba(255,255,255,0.85)'
+            background: 'rgba(255,255,255,0.92)'
           }}>
             <h3 style={{ margin: '0 0 1.25rem', color: '#0C4A6E', fontFamily: "'Inter', system-ui, sans-serif" }}>
               Novo Usuário
@@ -191,7 +387,7 @@ export const UsersPanel: React.FC = () => {
             <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {[
                 { label: 'Nome', val: newNome, set: setNewNome, type: 'text', placeholder: 'Nome do usuário' },
-                { label: 'Senha', val: newSenha, set: setNewSenha, type: 'password', placeholder: 'Mínimo 6 caracteres' },
+                { label: 'Senha', val: newSenha, set: setNewSenha, type: 'password', placeholder: 'Mínimo 4 caracteres' },
                 { label: 'Confirmar Senha', val: confirmSenha, set: setConfirmSenha, type: 'password', placeholder: 'Repita a senha' }
               ].map(f => (
                 <div key={f.label}>
@@ -236,12 +432,12 @@ export const UsersPanel: React.FC = () => {
       {toast && (
         <div style={{
           position: 'fixed', bottom: '1.5rem', right: '1.5rem',
-          background: 'rgba(255,255,255,0.92)',
+          background: 'rgba(255,255,255,0.95)',
           backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(56,189,248,0.4)',
+          border: '1px solid rgba(56,189,248,0.5)',
           borderRadius: '12px', padding: '0.75rem 1.25rem',
           color: '#0C4A6E', fontWeight: 600, fontSize: '0.85rem',
-          boxShadow: '0 4px 20px rgba(31,147,255,0.2)',
+          boxShadow: '0 4px 20px rgba(31,147,255,0.25)',
           zIndex: 2000, fontFamily: "'Inter', system-ui, sans-serif"
         }}>
           {toast}

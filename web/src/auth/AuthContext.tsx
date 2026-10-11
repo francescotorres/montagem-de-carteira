@@ -44,36 +44,28 @@ const DEFAULT_USERS: LocalStoredUser[] = [
 const getLocalUsers = (): LocalStoredUser[] => {
   try {
     const raw = localStorage.getItem(USERS_DB_KEY);
+    if (!raw) {
+      const initialUsers = DEFAULT_USERS.map(u => ({ ...u }));
+      localStorage.setItem(USERS_DB_KEY, JSON.stringify(initialUsers));
+      return initialUsers;
+    }
+
     let users: LocalStoredUser[] = [];
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          users = parsed;
-        }
-      } catch {
-        users = [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        users = parsed;
       }
+    } catch {
+      users = [];
     }
 
-    let modified = false;
-
-    // Garante que os usuários padrão existam e tenham as credenciais atualizadas para 123456
-    for (const def of DEFAULT_USERS) {
-      const idx = users.findIndex(u => u.nome.trim().toLowerCase() === def.nome.trim().toLowerCase());
-      if (idx === -1) {
-        users.push({ ...def });
-        modified = true;
-      } else if (users[idx].passwordHash !== def.passwordHash) {
-        // Garante sincronia da senha caso o storage local anterior esteja com a senha antiga
-        users[idx].passwordHash = def.passwordHash;
-        modified = true;
-      }
-    }
-
-    if (modified || !raw) {
+    // Se todos os usuários forem removidos, preserva Francesco com 123456 para evitar lockout
+    if (users.length === 0) {
+      users = [{ id: 1, nome: 'Francesco', passwordHash: '123456' }];
       localStorage.setItem(USERS_DB_KEY, JSON.stringify(users));
     }
+
     return users;
   } catch {
     return DEFAULT_USERS;
@@ -95,6 +87,7 @@ interface AuthContextType {
   listUsers: () => Promise<UserItem[]>;
   createUser: (nome: string, senha: string) => Promise<UserItem>;
   deleteUser: (id: number) => Promise<void>;
+  updatePassword: (id: number, novaSenha: string) => Promise<void>;
   apiBase: string;
   isStandaloneMode: boolean;
 }
@@ -267,7 +260,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { id: newUser.id, nome: newUser.nome };
   };
 
+  const updatePassword = async (id: number, novaSenha: string): Promise<void> => {
+    const trimmedSenha = novaSenha.trim();
+    if (trimmedSenha.length < 4) {
+      throw new Error('A senha deve ter ao menos 4 caracteres');
+    }
+
+    if (API_BASE && !isStandalone) {
+      try {
+        const res = await fetch(`${API_BASE}/api/users/${id}/password`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ senha: trimmedSenha })
+        });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error((errData as { message?: string }).message || 'Erro ao atualizar senha no servidor');
+        }
+      } catch (err) {
+        if (!(err instanceof TypeError)) throw err;
+      }
+    }
+
+    // Modo Standalone Local
+    const users = getLocalUsers();
+    const target = users.find(u => u.id === id);
+    if (!target) throw new Error('Usuário não encontrado');
+    target.passwordHash = trimmedSenha;
+    saveLocalUsers(users);
+  };
+
   const deleteUser = async (id: number): Promise<void> => {
+    const users = getLocalUsers();
+    const target = users.find(u => u.id === id);
+    if (!target) throw new Error('Usuário não encontrado');
+
+    const wasSelf = Boolean(user && target.nome.toLowerCase() === user.nome.toLowerCase());
+
     if (API_BASE && !isStandalone) {
       try {
         const res = await fetch(`${API_BASE}/api/users/${id}`, {
@@ -277,22 +309,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             'Authorization': `Bearer ${token}`
           }
         });
-        if (res.status === 403) throw new Error('Você não pode excluir o usuário conectado atualmente');
-        if (!res.ok) throw new Error('Erro ao excluir usuário');
-        return;
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error((errData as { message?: string }).message || 'Erro ao excluir usuário');
+        }
       } catch (err) {
         if (!(err instanceof TypeError)) throw err;
       }
     }
 
-    const users = getLocalUsers();
-    const target = users.find(u => u.id === id);
-    if (!target) throw new Error('Usuário não encontrado');
-    if (target.nome.toLowerCase() === user?.nome.toLowerCase()) {
-      throw new Error('Você não pode excluir a si mesmo');
+    let updated = users.filter(u => u.id !== id);
+    if (updated.length === 0) {
+      updated = [{ id: 1, nome: 'Francesco', passwordHash: '123456' }];
     }
-    const updated = users.filter(u => u.id !== id);
     saveLocalUsers(updated);
+
+    if (wasSelf) {
+      logout();
+    }
   };
 
   return (
@@ -305,6 +339,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       listUsers,
       createUser,
       deleteUser,
+      updatePassword,
       apiBase: API_BASE,
       isStandaloneMode: isStandalone
     }}>

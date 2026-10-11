@@ -25,4 +25,11 @@ class UserController(private val userService: UserService) {
         val currentNome = SecurityContextHolder.getContext().authentication?.name ?: ""
         userService.deleteUser(id, currentNome)
     }
+
+    @PutMapping("/{id}/password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun updatePassword(@PathVariable id: Long, @RequestBody body: Map<String, String>) {
+        val newSenha = body["senha"] ?: body["newPassword"] ?: body["password"] ?: ""
+        userService.updatePassword(id, newSenha)
+    }
 }
