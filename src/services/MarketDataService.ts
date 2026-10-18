@@ -118,7 +118,7 @@ export class MarketDataService {
       }
 
       // Calculate provider-specific TTL
-      const ttlMs = source === 'BORA_INVESTIR' ? this.boraInvestirTtlMs : this.googleFinanceTtlMs;
+      const ttlMs = liveQuote.source === 'BORA_INVESTIR' ? this.boraInvestirTtlMs : this.googleFinanceTtlMs;
       const now = Date.now();
 
       // Update in-memory cache
@@ -218,21 +218,89 @@ export class MarketDataService {
    * Target URL: https://borainvestir.b3.com.br/cotacoes/etf/{TICKER}
    */
   public async fetchFromBoraInvestir(ticker: string): Promise<QuoteDTO> {
-    const url = `https://borainvestir.b3.com.br/cotacoes/etf/${ticker}`;
+    // 1. Try Bora Investir ETF portal
+    try {
+      const url = `https://borainvestir.b3.com.br/cotacoes/etf/${ticker}`;
+      const response = await this.fetchFn(url, {
+        headers: {
+          'User-Agent': this.userAgent,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
+        }
+      });
+
+      if (response.ok) {
+        const html = await response.text();
+        return this.parseBoraInvestirHtml(html, ticker);
+      }
+    } catch {
+      // Fallback to B3 Official Market Data Service
+    }
+
+    // 2. Fallback to B3 Official Market Data Service (cotacao.b3.com.br)
+    return this.fetchFromB3MarketData(ticker);
+  }
+
+  /**
+   * B3 Official Market Data Service (cotacao.b3.com.br) scraper/parser.
+   * Target URL: https://cotacao.b3.com.br/mds/api/v1/instrumentQuotation/{TICKER}
+   */
+  public async fetchFromB3MarketData(ticker: string): Promise<QuoteDTO> {
+    const url = `https://cotacao.b3.com.br/mds/api/v1/instrumentQuotation/${ticker}`;
     const response = await this.fetchFn(url, {
       headers: {
         'User-Agent': this.userAgent,
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
+        'Accept': 'application/json'
       }
     });
 
     if (!response.ok) {
-      throw new Error(`Bora Investir returned HTTP status ${response.status} for ${ticker}`);
+      throw new Error(`B3 official portal returned HTTP status ${response.status} for ${ticker}`);
     }
 
-    const html = await response.text();
-    return this.parseBoraInvestirHtml(html, ticker);
+    const data = await response.json();
+    return this.parseB3MarketDataJson(data, ticker);
+  }
+
+  /**
+   * Parses B3 Official Market Data Service JSON into standardized QuoteDTO.
+   */
+  public parseB3MarketDataJson(json: any, ticker: string): QuoteDTO {
+    const trad = json?.Trad?.[0];
+    const qtn = trad?.scty?.SctyQtn;
+    const curPrc = qtn?.curPrc;
+
+    if (!curPrc || typeof curPrc !== 'number' || curPrc <= 0) {
+      throw new Error(`Failed to parse current price from B3 Official Portal for ticker ${ticker}`);
+    }
+
+    const currentPrice = Number(curPrc.toFixed(2));
+    const high = qtn.maxPric ? Number(qtn.maxPric.toFixed(2)) : currentPrice;
+    const low = qtn.minPric ? Number(qtn.minPric.toFixed(2)) : currentPrice;
+    const volume = trad.ttlQty || 0;
+
+    let previousClose = currentPrice;
+    if (typeof qtn.prcFlcn === 'number') {
+      const factor = 1 + qtn.prcFlcn / 100;
+      if (factor > 0) {
+        previousClose = Number((currentPrice / factor).toFixed(2));
+      }
+    } else if (qtn.opngPric) {
+      previousClose = Number(qtn.opngPric.toFixed(2));
+    }
+
+    return {
+      ticker,
+      currentPrice,
+      previousClose,
+      high,
+      low,
+      volume,
+      pl: null,
+      dy: null,
+      source: 'BORA_INVESTIR',
+      updatedAt: new Date().toISOString()
+    };
   }
 
   /**

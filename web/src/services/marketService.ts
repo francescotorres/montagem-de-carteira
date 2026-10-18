@@ -97,7 +97,64 @@ export async function fetchMarketQuote(tickerInput: string): Promise<ScrapedMark
     // Prossegue para provedores alternativos / fallback
   }
 
-  // 3. Fallback: Brapi API
+  // 3. Fallback Direto B3 (Portal Oficial / MDS): se o Google Finance ou a API do backend falhar
+  try {
+    const b3Url = `https://cotacao.b3.com.br/mds/api/v1/instrumentQuotation/${ticker}`;
+    const res = await fetch(b3Url, {
+      signal: AbortSignal.timeout(6000),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const trad = data?.Trad?.[0];
+      const qtn = trad?.scty?.SctyQtn;
+      const curPrc = qtn?.curPrc;
+
+      if (curPrc && typeof curPrc === 'number' && curPrc > 0) {
+        const currentPrice = Number(curPrc.toFixed(2));
+        const high = qtn.maxPric ? Number(qtn.maxPric.toFixed(2)) : currentPrice;
+        const low = qtn.minPric ? Number(qtn.minPric.toFixed(2)) : currentPrice;
+        const volume = trad.ttlQty || 0;
+
+        let previousClose = currentPrice;
+        if (typeof qtn.prcFlcn === 'number') {
+          const factor = 1 + qtn.prcFlcn / 100;
+          if (factor > 0) {
+            previousClose = Number((currentPrice / factor).toFixed(2));
+          }
+        } else if (qtn.opngPric) {
+          previousClose = Number(qtn.opngPric.toFixed(2));
+        }
+
+        const quoteDto: QuoteDTO = {
+          ticker,
+          currentPrice,
+          previousClose,
+          high,
+          low,
+          volume,
+          pl: null,
+          dy: null,
+          source: 'BORA_INVESTIR',
+          updatedAt: new Date().toISOString(),
+        };
+
+        setStoredCache(quoteDto);
+        return {
+          ticker,
+          price: currentPrice,
+          lastDividend: null,
+          dy12m: null,
+          name: trad.scty?.desc || ticker,
+          source: 'B3 Oficial / Bora Investir',
+          success: true,
+        };
+      }
+    }
+  } catch {
+    // Prossegue para Brapi / Yahoo / cache
+  }
+
+  // 4. Fallback: Brapi API
   try {
     const brapiToken = import.meta.env.VITE_BRAPI_TOKEN;
     const brapiUrl = brapiToken

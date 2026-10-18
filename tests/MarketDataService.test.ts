@@ -383,6 +383,50 @@ describe('MarketDataService', () => {
       expect(result.currentPrice).toBe(47.99);
     });
 
+    it('MUST automatically switch to Bora Investir / B3 when Google Finance fails', async () => {
+      mockFetch.mockImplementation(async (url: string) => {
+        if (url.includes('google.com')) {
+          throw new Error('Google Finance 429 Too Many Requests');
+        }
+        if (url.includes('borainvestir.b3.com.br')) {
+          return { ok: false, status: 404, text: async () => 'Not Found' };
+        }
+        if (url.includes('cotacao.b3.com.br')) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              Trad: [
+                {
+                  scty: {
+                    SctyQtn: {
+                      curPrc: 9.15,
+                      opngPric: 9.15,
+                      minPric: 9.12,
+                      maxPric: 9.17,
+                      prcFlcn: 0
+                    },
+                    symb: 'KNSC11',
+                    desc: 'FII KINEA SCCI'
+                  },
+                  ttlQty: 11023
+                }
+              ]
+            })
+          };
+        }
+        throw new Error('Unknown URL: ' + url);
+      });
+
+      const quote = await service.getQuote('KNSC11');
+
+      expect(quote).toMatchObject({
+        ticker: 'KNSC11',
+        currentPrice: 9.15,
+        source: 'BORA_INVESTIR'
+      });
+    });
+
     it('throws descriptive error if live fetch fails and no fallback record is available', async () => {
       mockFetch.mockRejectedValueOnce(new Error('DNS Resolution failure'));
       vi.mocked(mockDb.getLastKnownQuote).mockResolvedValueOnce(null);
