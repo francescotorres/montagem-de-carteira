@@ -117,16 +117,19 @@ describe('MarketDataService', () => {
   });
 
   describe('1. Routing Rules', () => {
-    it('MUST route SPYI11 and LFIX11 strictly to Bora Investir', () => {
+    it('MUST route SPYI11, LFIX11, and WRLD11 strictly to Bora Investir', () => {
       expect(service.getTargetSource('SPYI11')).toBe('BORA_INVESTIR');
       expect(service.getTargetSource('LFIX11')).toBe('BORA_INVESTIR');
+      expect(service.getTargetSource('WRLD11')).toBe('BORA_INVESTIR');
       expect(service.getTargetSource('spyi11')).toBe('BORA_INVESTIR');
       expect(service.getTargetSource('lfix11')).toBe('BORA_INVESTIR');
+      expect(service.getTargetSource('wrld11')).toBe('BORA_INVESTIR');
     });
 
     it('MUST route all other assets (Stocks, FIIs, BDRs, ETFs) to Google Finance', () => {
       expect(service.getTargetSource('WEGE3')).toBe('GOOGLE_FINANCE');
       expect(service.getTargetSource('wege3')).toBe('GOOGLE_FINANCE');
+      expect(service.getTargetSource('KNSC11')).toBe('GOOGLE_FINANCE');
       expect(service.getTargetSource('PETR4')).toBe('GOOGLE_FINANCE');
       expect(service.getTargetSource('VALE3')).toBe('GOOGLE_FINANCE');
       expect(service.getTargetSource('MXRF11')).toBe('GOOGLE_FINANCE');

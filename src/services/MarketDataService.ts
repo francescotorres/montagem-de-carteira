@@ -8,6 +8,11 @@ import {
   MarketDataServiceOptions
 } from '../types/quote.types.js';
 
+if (typeof process !== 'undefined' && process.env) {
+  // Allow Node.js to fetch from B3 Bora Investir and financial portals without failing on leaf certificates (UNABLE_TO_VERIFY_LEAF_SIGNATURE)
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 /**
  * In-memory fallback database implementation when no external database is injected.
  * Persists the last known quote across cache expirations.
@@ -43,7 +48,7 @@ export class MarketDataService {
   private readonly cache = new Map<string, CachedQuote>();
 
   // Specific tickers strictly routed to Bora Investir (B3 Official Portal)
-  private readonly boraInvestirTickers = new Set<string>(['SPYI11', 'LFIX11']);
+  private readonly boraInvestirTickers = new Set<string>(['SPYI11', 'LFIX11', 'WRLD11']);
 
   constructor(options: MarketDataServiceOptions = {}) {
     this.googleFinanceTtlMs = options.googleFinanceTtlMs ?? 5 * 60 * 1000; // 5 minutes
@@ -89,9 +94,27 @@ export class MarketDataService {
     try {
       let liveQuote: QuoteDTO;
       if (source === 'BORA_INVESTIR') {
-        liveQuote = await this.fetchFromBoraInvestir(ticker);
+        try {
+          liveQuote = await this.fetchFromBoraInvestir(ticker);
+        } catch (boraErr) {
+          // If Bora Investir fails, attempt Google Finance fallback
+          try {
+            liveQuote = await this.fetchFromGoogleFinance(ticker);
+          } catch {
+            throw boraErr;
+          }
+        }
       } else {
-        liveQuote = await this.fetchFromGoogleFinance(ticker);
+        try {
+          liveQuote = await this.fetchFromGoogleFinance(ticker);
+        } catch (gfErr) {
+          // If Google Finance fails (e.g. for ETFs like WRLD11), attempt Bora Investir fallback
+          try {
+            liveQuote = await this.fetchFromBoraInvestir(ticker);
+          } catch {
+            throw gfErr;
+          }
+        }
       }
 
       // Calculate provider-specific TTL
@@ -433,11 +456,20 @@ export class MarketDataService {
       if (!isNaN(parsed) && parsed > 0) previousClose = parsed;
     } else {
       // Deduce from Day Change (e.g. (+0.45) Today or (-1.20) Today)
-      const changeMatch = html.match(/<span[^>]*jsname="xnruHf"[^>]*>\s*<span[^>]*>([+-]?[\d.,]+)<\/span>/i);
+      // Scope search to the asset header / price container to avoid reading global market indices at top
+      const priceContainerIndex = html.indexOf('class="N6SYTe"');
+      const searchContext = priceContainerIndex !== -1
+        ? html.substring(priceContainerIndex, priceContainerIndex + 800)
+        : html;
+      const changeMatch = searchContext.match(/<span[^>]*jsname="xnruHf"[^>]*>\s*<span[^>]*>([+-]?[\d.,]+)<\/span>/i);
       if (changeMatch) {
         const changeVal = this.cleanUniversalNumber(changeMatch[1]);
         if (!isNaN(changeVal)) {
-          previousClose = Number((currentPrice - changeVal).toFixed(2));
+          const calculatedPrev = Number((currentPrice - changeVal).toFixed(2));
+          // Sanity check: prev close shouldn't deviate wildly from current price (> 50% deviation indicates index contamination)
+          if (calculatedPrev > 0 && Math.abs(calculatedPrev - currentPrice) < currentPrice * 0.5) {
+            previousClose = calculatedPrev;
+          }
         }
       } else {
         const openStr = stats['open'] || stats['abertura'];

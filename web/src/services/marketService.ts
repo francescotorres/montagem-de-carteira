@@ -1,7 +1,7 @@
 import type { ScrapedMarketData } from '../types';
 import type { QuoteDTO, ProgressNotification, ProgressCallback } from '../types/quote.types';
 
-const BORA_INVESTIR_TICKERS = new Set(['SPYI11', 'LFIX11']);
+const BORA_INVESTIR_TICKERS = new Set(['SPYI11', 'LFIX11', 'WRLD11']);
 const CACHE_KEY_PREFIX = 'b3_quote_cache_';
 const GOOGLE_FINANCE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const BORA_INVESTIR_TTL_MS = 15 * 60 * 1000; // 15 minutes
@@ -41,7 +41,7 @@ function setStoredCache(quote: QuoteDTO): void {
 
 /**
  * Consulta cotação para um único ativo com roteamento estrito e fallbacks:
- * - SPYI11 e LFIX11: Bora Investir (Portal Oficial B3)
+ * - SPYI11, LFIX11 e WRLD11: Bora Investir (Portal Oficial B3)
  * - Demais ativos: Google Finance (BVMF:TICKER)
  */
 export async function fetchMarketQuote(tickerInput: string): Promise<ScrapedMarketData> {
