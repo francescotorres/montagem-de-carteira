@@ -20,7 +20,9 @@ debug.keystore
 # Node & Web artifacts
 node_modules
 web/node_modules
+dist
 web/dist
 .npm
 *.log
 *.db
+

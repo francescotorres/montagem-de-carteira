@@ -10,6 +10,19 @@
     "build": "npm --prefix web install && npm --prefix web run build",
     "web:build": "npm --prefix web install && npm --prefix web run build",
     "web:dev": "npm --prefix web run dev",
-    "web:preview": "npm --prefix web run preview"
+    "web:preview": "npm --prefix web run preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.5",
+    "@types/supertest": "^7.2.1",
+    "supertest": "^7.3.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "express": "^5.3.0"
   }
 }
