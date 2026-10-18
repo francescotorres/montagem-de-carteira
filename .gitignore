@@ -18,6 +18,7 @@ local.properties
 debug.keystore
 
 # Node & Web artifacts
+/package-lock.json
 node_modules
 web/node_modules
 dist
