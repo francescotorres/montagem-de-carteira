@@ -10,7 +10,8 @@ import {
   executeValueDistribution,
   executeCategoryRebalancing,
 } from './services/balancingEngine';
-import { fetchMarketQuote } from './services/marketService';
+import { fetchMarketQuote, updatePortfolioQuotes } from './services/marketService';
+import type { QuoteDTO, ProgressNotification } from './types/quote.types';
 import { Navbar } from './components/Navbar';
 import { ClientConfigCard } from './components/ClientConfigCard';
 import { ProfileSelector } from './components/ProfileSelector';
@@ -19,6 +20,7 @@ import { CategoryBalanceScreen } from './components/CategoryBalanceScreen';
 import { ReportScreen } from './components/ReportScreen';
 import { AddEditAssetModal } from './components/AddEditAssetModal';
 import { EditClientConfigModal } from './components/EditClientConfigModal';
+import { QuoteProgressModal, type TickerProgressState } from './components/QuoteProgressModal';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -66,6 +68,12 @@ export const App: React.FC = () => {
   // Modals state
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [editingAsset, setEditingAsset] = useState<FiiAsset | null | undefined>(undefined); // undefined = closed, null = new, FiiAsset = edit
+  const [showQuoteProgressModal, setShowQuoteProgressModal] = useState(false);
+  const [quoteProgressIndex, setQuoteProgressIndex] = useState(0);
+  const [quoteProgressTotal, setQuoteProgressTotal] = useState(0);
+  const [quoteProgressCurrentTicker, setQuoteProgressCurrentTicker] = useState('');
+  const [quoteProgressItems, setQuoteProgressItems] = useState<TickerProgressState[]>([]);
+  const [quoteProgressComplete, setQuoteProgressComplete] = useState(false);
 
   // Sync to local storage
   useEffect(() => {
@@ -173,43 +181,87 @@ export const App: React.FC = () => {
     }
   };
 
-  // Live Quotes Refresh
+  // Live Quotes Refresh with real-time UI modal
   const handleRefreshQuotes = async () => {
-    setIsRefreshing(true);
-    showToast('Buscando cotações atualizadas na B3...', 'info');
-
-    let updatedCount = 0;
-    const newAssets = [...assets];
-
-    for (let i = 0; i < newAssets.length; i++) {
-      const asset = newAssets[i];
-      if (!asset.isSelected) continue;
-
-      try {
-        const quote = await fetchMarketQuote(asset.ticker);
-        if (quote.success && quote.price && quote.price > 0) {
-          newAssets[i] = {
-            ...asset,
-            currentPrice: quote.price,
-            lastDividend: quote.lastDividend ?? asset.lastDividend,
-            isPriceUpdated: true,
-            lastUpdated: Date.now(),
-          };
-          updatedCount++;
-        }
-      } catch {
-        // Fallback
-      }
+    const selectedAssets = assets.filter((a) => a.isSelected);
+    if (selectedAssets.length === 0) {
+      showToast('Selecione ao menos um ativo para atualizar cotações.', 'warn');
+      return;
     }
 
-    setAssets(newAssets);
-    setIsRefreshing(false);
-    showToast(
-      updatedCount > 0
-        ? `Cotações de ${updatedCount} ativo(s) atualizadas com sucesso!`
-        : 'Cotações verificadas.',
-      'success'
+    const tickers = selectedAssets.map((a) => a.ticker);
+    setQuoteProgressTotal(tickers.length);
+    setQuoteProgressIndex(1);
+    setQuoteProgressCurrentTicker(tickers[0]);
+    setQuoteProgressComplete(false);
+    setQuoteProgressItems(
+      selectedAssets.map((a) => ({
+        ticker: a.ticker,
+        name: a.name,
+        status: 'pending',
+        previousPrice: a.currentPrice,
+      }))
     );
+    setShowQuoteProgressModal(true);
+    setIsRefreshing(true);
+
+    try {
+      const quotes = await updatePortfolioQuotes(tickers, (progress: ProgressNotification) => {
+        setQuoteProgressIndex(progress.current);
+        setQuoteProgressCurrentTicker(progress.ticker);
+
+        setQuoteProgressItems((prev) =>
+          prev.map((item) => {
+            if (item.ticker.toUpperCase() === progress.ticker.toUpperCase()) {
+              return {
+                ...item,
+                status: progress.status,
+                currentPrice: progress.quote?.currentPrice ?? item.currentPrice,
+                source: progress.quote?.source ?? item.source,
+                error: progress.error,
+              };
+            }
+            return item;
+          })
+        );
+      });
+
+      // Update assets state with new quotes
+      if (quotes.length > 0) {
+        const quoteMap = new Map<string, QuoteDTO>();
+        for (const q of quotes) {
+          quoteMap.set(q.ticker.toUpperCase(), q);
+        }
+
+        setAssets((prev) =>
+          prev.map((asset) => {
+            const found = quoteMap.get(asset.ticker.toUpperCase());
+            if (found && found.currentPrice > 0) {
+              return {
+                ...asset,
+                currentPrice: found.currentPrice,
+                isPriceUpdated: true,
+                lastUpdated: Date.now(),
+              };
+            }
+            return asset;
+          })
+        );
+
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { y: 0.8 },
+        });
+      }
+
+      setQuoteProgressComplete(true);
+      showToast(`Cotações sincronizadas com sucesso!`, 'success');
+    } catch (err: any) {
+      showToast(`Erro na sincronização: ${err.message}`, 'warn');
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   // Rebalance by categories
@@ -393,6 +445,18 @@ export const App: React.FC = () => {
             setShowConfigModal(false);
             showToast('Parâmetros do cliente atualizados com sucesso!', 'success');
           }}
+        />
+      )}
+
+      {showQuoteProgressModal && (
+        <QuoteProgressModal
+          isOpen={showQuoteProgressModal}
+          onDismiss={() => setShowQuoteProgressModal(false)}
+          currentIndex={quoteProgressIndex}
+          totalTickers={quoteProgressTotal}
+          currentTicker={quoteProgressCurrentTicker}
+          items={quoteProgressItems}
+          isComplete={quoteProgressComplete}
         />
       )}
     </div>
